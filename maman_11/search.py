@@ -12,6 +12,7 @@ by Pacman agents (in searchAgents.py).
 """
 
 import util
+import game
 
 class SearchProblem:
   """
@@ -68,9 +69,6 @@ def tinyMazeSearch(problem):
   return  [s,s,w,s,w,w,s,w]
 
 
-
-
-
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first [p 74].
@@ -85,8 +83,6 @@ def depthFirstSearch(problem):
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
-    "*** YOUR CODE HERE ***"
-
     closed_set = set()
     path = []
 
@@ -96,11 +92,10 @@ def depthFirstSearch(problem):
     while True:
         if fringe.isEmpty():
             raise Exception("DFS Failure")
-
         node = fringe.pop()
         if problem.isGoalState(node):
             path.append((node, 0))
-            return node
+            return get_directions_list(path)
         else:
             if node not in closed_set:
                 closed_set.add(node)
@@ -111,6 +106,16 @@ def depthFirstSearch(problem):
                         fringe.push(successors[0])
                 path.append((node, expanded_nodes))
             remove_path_tail_in_case_of_dead_end(path)
+
+
+def get_directions_list(path):
+    to_return = []
+    x = path.pop(0)[0]
+    while len(path) != 0:
+        y = path.pop(0)[0]
+        to_return.append(game.Actions.vectorToDirection((y[0] - x[0], y[1] - x[1])))
+        x = y
+    return to_return
 
 
 def remove_path_tail_in_case_of_dead_end(path):
