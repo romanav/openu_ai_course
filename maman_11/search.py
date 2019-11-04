@@ -84,7 +84,7 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     closed_set = set()
-    path = []
+    node_path = []
 
     fringe = util.Stack()
     fringe.push(problem.getStartState())
@@ -94,8 +94,8 @@ def depthFirstSearch(problem):
             raise Exception("DFS Failure")
         node = fringe.pop()
         if problem.isGoalState(node):
-            path.append((node, 0))
-            return get_directions_list(path)
+            node_path.append((node, 0))
+            return get_directions_list(node_path)
         else:
             if node not in closed_set:
                 closed_set.add(node)
@@ -104,14 +104,17 @@ def depthFirstSearch(problem):
                     if successors[0] not in closed_set:
                         expanded_nodes += 1
                         fringe.push(successors[0])
-                path.append((node, expanded_nodes))
-            remove_path_tail_in_case_of_dead_end(path)
+                node_path.append((node, expanded_nodes))
+            remove_path_tail_in_case_of_dead_end(node_path)
 
 
 def get_directions_list(path):
+    if not path:
+        return []
+
     to_return = []
     x = path.pop(0)[0]
-    while len(path) != 0:
+    while path:
         y = path.pop(0)[0]
         to_return.append(game.Actions.vectorToDirection((y[0] - x[0], y[1] - x[1])))
         x = y
