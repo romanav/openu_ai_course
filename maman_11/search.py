@@ -68,6 +68,9 @@ def tinyMazeSearch(problem):
   return  [s,s,w,s,w,w,s,w]
 
 
+
+
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first [p 74].
@@ -85,6 +88,8 @@ def depthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
 
     closed_set = set()
+    path = []
+
     fringe = util.Stack()
     fringe.push(problem.getStartState())
 
@@ -94,15 +99,25 @@ def depthFirstSearch(problem):
 
         node = fringe.pop()
         if problem.isGoalState(node):
+            path.append((node, 0))
             return node
         else:
             if node not in closed_set:
                 closed_set.add(node)
+                expanded_nodes = 0
                 for successors in problem.getSuccessors(node):
-                    if successors not in closed_set:
+                    if successors[0] not in closed_set:
+                        expanded_nodes += 1
                         fringe.push(successors[0])
+                path.append((node, expanded_nodes))
+            remove_path_tail_in_case_of_dead_end(path)
 
 
+def remove_path_tail_in_case_of_dead_end(path):
+    if path[-1][1] <= 0:
+        path.pop(-1)
+        path[-1] = path[-1][0], path[-1][1] - 1
+        remove_path_tail_in_case_of_dead_end(path)
 
 
 def breadthFirstSearch(problem):
