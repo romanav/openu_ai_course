@@ -98,7 +98,9 @@ def depthFirstSearch(problem):
         else:
             if node not in closed_set:
                 closed_set.add(node)
-                map(lambda x: fringe.push(x[0]), problem.getSuccessors(node))
+                for successors in problem.getSuccessors(node):
+                    if successors not in closed_set:
+                        fringe.push(successors[0])
 
 
 
