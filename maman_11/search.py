@@ -71,19 +71,6 @@ def tinyMazeSearch(problem):
 
 
 def depthFirstSearch(problem):
-    """
-    Search the deepest nodes in the search tree first [p 74].
-
-    Your search algorithm needs to return a list of actions that reaches
-    the goal.  Make sure to implement a graph search algorithm [Fig. 3.18].
-
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
-
-    print "Start:", problem.getStartState()
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
-    """
     closed_set = set()
     node_path = []
 
@@ -129,8 +116,6 @@ def remove_path_tail_in_case_of_dead_end(path):
         remove_path_tail_in_case_of_dead_end(path)
 
 
-
-
 def breadthFirstSearch(problem):
     closed_set = set()
     node_path = []
@@ -154,28 +139,18 @@ def breadthFirstSearch(problem):
                 for successors in problem.getSuccessors(node):
                     if successors[0] not in closed_set:
                         fringe.push(successors[0])
-                        path[successors[0]] = node
+                        path[successors[0]] = node, successors[1]
+
 
 bfs_path = []
 
+
 def get_directions_list_from_bfs(goal, path):
-    if goal is None:
-        return get_directions_list_bfs(bfs_path)
-    bfs_path.append(goal)
-    return get_directions_list_from_bfs(path[goal], path)
-
-
-def get_directions_list_bfs(ll):
-    if not ll:
-        return []
-
-    to_return = []
-    x = ll.pop(-1)
-    while ll:
-        y = ll.pop(-1)
-        to_return.append(game.Actions.vectorToDirection((y[0] - x[0], y[1] - x[1])))
-        x = y
-    return to_return
+    if path[goal] is None:
+        bfs_path.reverse()
+        return bfs_path
+    bfs_path.append(path[goal][1])
+    return get_directions_list_from_bfs(path[goal][0], path)
 
 
 def uniformCostSearch(problem):
