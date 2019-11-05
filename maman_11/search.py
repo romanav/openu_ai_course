@@ -71,86 +71,47 @@ def tinyMazeSearch(problem):
 
 
 def depthFirstSearch(problem):
-    closed_set = set()
-    node_path = []
-
-    fringe = util.Stack()
-    fringe.push(problem.getStartState())
-
-    while True:
-        if fringe.isEmpty():
-            raise Exception("DFS Failure")
-        node = fringe.pop()
-        if problem.isGoalState(node):
-            node_path.append((node, 0))
-            return get_directions_list(node_path)
-        else:
-            if node not in closed_set:
-                closed_set.add(node)
-                expanded_nodes = 0
-                for successors in problem.getSuccessors(node):
-                    if successors[0] not in closed_set:
-                        expanded_nodes += 1
-                        fringe.push(successors[0])
-                node_path.append((node, expanded_nodes))
-            remove_path_tail_in_case_of_dead_end(node_path)
-
-
-def get_directions_list(path):
-    if not path:
-        return []
-
-    to_return = []
-    x = path.pop(0)[0]
-    while path:
-        y = path.pop(0)[0]
-        to_return.append(game.Actions.vectorToDirection((y[0] - x[0], y[1] - x[1])))
-        x = y
-    return to_return
-
-
-def remove_path_tail_in_case_of_dead_end(path):
-    if path[-1][1] <= 0:
-        path.pop(-1)
-        path[-1] = path[-1][0], path[-1][1] - 1
-        remove_path_tail_in_case_of_dead_end(path)
+    return GraphSearch().search(problem, util.Stack())
 
 
 def breadthFirstSearch(problem):
-    closed_set = set()
-    node_path = []
-
-    fringe = util.Queue()
-    fringe.push(problem.getStartState())
-
-    path = {problem.getStartState(): None}
-
-    while True:
-        if fringe.isEmpty():
-            raise Exception("BFS Failure")
-        node = fringe.pop()
-
-        if problem.isGoalState(node):
-            node_path.append((node, 0))
-            return get_directions_list_from_bfs(node, path)
-        else:
-            if node not in closed_set:
-                closed_set.add(node)
-                for successors in problem.getSuccessors(node):
-                    if successors[0] not in closed_set:
-                        fringe.push(successors[0])
-                        path[successors[0]] = node, successors[1]
+    return GraphSearch().search(problem, util.Queue())
 
 
-bfs_path = []
+class GraphSearch(object):
 
+    def __init__(self):
+        self.bfs_path = []
 
-def get_directions_list_from_bfs(goal, path):
-    if path[goal] is None:
-        bfs_path.reverse()
-        return bfs_path
-    bfs_path.append(path[goal][1])
-    return get_directions_list_from_bfs(path[goal][0], path)
+    def search(self, problem, fringe):
+        closed_set = set()
+        node_path = []
+        fringe.push(problem.getStartState())
+        path = {problem.getStartState(): None}
+
+        while True:
+            if fringe.isEmpty():
+                raise Exception("BFS Failure")
+            node = fringe.pop()
+
+            if problem.isGoalState(node):
+                node_path.append((node, 0))
+                return self.get_directions_list(node, path)
+            else:
+                if node not in closed_set:
+                    closed_set.add(node)
+                    for successors in problem.getSuccessors(node):
+                        if successors[0] not in closed_set:
+                            fringe.push(successors[0])
+                            path[successors[0]] = node, successors[1]
+
+    def get_directions_list(self, goal, path):
+        if path[goal] is None:
+            self.bfs_path.reverse()
+            print ("Path Size: " + str(len(self.bfs_path)))
+            return self.bfs_path
+        self.bfs_path.append(path[goal][1])
+        return self.get_directions_list(path[goal][0], path)
 
 
 def uniformCostSearch(problem):
