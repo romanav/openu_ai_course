@@ -71,38 +71,40 @@ def tinyMazeSearch(problem):
 
 
 def depthFirstSearch(problem):
-    return GraphSearch().search(problem, util.Stack())
+    return GraphSearch(problem, util.Stack()).search()
 
 
 def breadthFirstSearch(problem):
-    return GraphSearch().search(problem, util.Queue())
+    return GraphSearch(problem, util.Queue()).search()
 
 
 class GraphSearch(object):
 
-    def __init__(self):
+    def __init__(self,  problem, fringe):
+        self.fringe = fringe
+        self.problem = problem
         self.bfs_path = []
 
-    def search(self, problem, fringe):
+    def search(self):
         closed_set = set()
         node_path = []
-        fringe.push(problem.getStartState())
-        path = {problem.getStartState(): None}
+        self.fringe.push(self.problem.getStartState())
+        path = {self.problem.getStartState(): None}
 
         while True:
-            if fringe.isEmpty():
+            if self.fringe.isEmpty():
                 raise Exception("BFS Failure")
-            node = fringe.pop()
+            node = self.fringe.pop()
 
-            if problem.isGoalState(node):
+            if self.problem.isGoalState(node):
                 node_path.append((node, 0))
                 return self.get_directions_list(node, path)
             else:
                 if node not in closed_set:
                     closed_set.add(node)
-                    for successors in problem.getSuccessors(node):
+                    for successors in self.problem.getSuccessors(node):
                         if successors[0] not in closed_set:
-                            fringe.push(successors[0])
+                            self.fringe.push(successors[0])
                             path[successors[0]] = node, successors[1]
 
     def get_directions_list(self, goal, path):
