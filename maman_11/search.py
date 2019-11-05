@@ -129,9 +129,32 @@ def remove_path_tail_in_case_of_dead_end(path):
 
 
 def breadthFirstSearch(problem):
-  "Search the shallowest nodes in the search tree first. [p 74]"
-  "*** YOUR CODE HERE ***"
-  util.raiseNotDefined()
+    closed_set = set()
+    node_path = []
+
+    fringe = util.Queue()
+    fringe.push(problem.getStartState())
+
+    path={}
+    path[problem.getStartState()] = None, 1
+
+    while True:
+        if fringe.isEmpty():
+            raise Exception("BFS Failure")
+        node = fringe.pop()
+
+        if problem.isGoalState(node):
+            node_path.append((node, 0))
+        else:
+            if node not in closed_set:
+                closed_set.add(node)
+                for successors in problem.getSuccessors(node):
+                    if successors[0] not in closed_set:
+                        fringe.push(successors[0])
+                        path[successors[0]] = node, path[node][1]+1
+
+
+
 
 def uniformCostSearch(problem):
   "Search the node of least total cost first. "
