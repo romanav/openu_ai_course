@@ -159,15 +159,23 @@ def breadthFirstSearch(problem):
 bfs_path = []
 
 def get_directions_list_from_bfs(goal, path):
-    prev, count = path[goal]
-    bfs_path.append(prev)
-    get_directions_list_from_bfs(goal, path)
+    if goal is None:
+        return get_directions_list_bfs(bfs_path)
+    bfs_path.append(goal)
+    return get_directions_list_from_bfs(path[goal], path)
 
 
+def get_directions_list_bfs(ll):
+    if not ll:
+        return []
 
-
-    pass
-
+    to_return = []
+    x = ll.pop(-1)
+    while ll:
+        y = ll.pop(-1)
+        to_return.append(game.Actions.vectorToDirection((y[0] - x[0], y[1] - x[1])))
+        x = y
+    return to_return
 
 
 def uniformCostSearch(problem):
