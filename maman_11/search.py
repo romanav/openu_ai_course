@@ -124,6 +124,7 @@ def uniformCostSearch(problem):
 
     node_path = []
     fringe.push((problem.getStartState(), 0))
+    path = {problem.getStartState(): None}
 
     while True:
         if fringe.isEmpty():
@@ -133,6 +134,7 @@ def uniformCostSearch(problem):
 
         if problem.isGoalState(node):
             node_path.append((node, 0))
+            return get_directions_list(node, path)
         else:
             if node not in closed_set:
                 closed_set.add(node)
@@ -140,6 +142,18 @@ def uniformCostSearch(problem):
                     if successors[0] not in closed_set:
                         new_distance = distance + successors[2]
                         fringe.push((successors[0], new_distance))
+                        path[successors[0]] = node, successors[1]
+
+
+bfs_path = []
+
+def get_directions_list(goal, path):
+    if path[goal] is None:
+        bfs_path.reverse()
+        print ("Path Size: " + str(len(bfs_path)))
+        return bfs_path
+    bfs_path.append(path[goal][1])
+    return get_directions_list(path[goal][0], path)
 
 
 class FringePriorityQueue(util.PriorityQueueWithFunction):
