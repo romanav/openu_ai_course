@@ -93,7 +93,7 @@ class GraphSearch(object):
 
         while True:
             if self.fringe.isEmpty():
-                raise Exception("BFS Failure")
+                raise Exception("Graph Search Failure")
             node = self.fringe.pop()
 
             if self.problem.isGoalState(node):
@@ -117,9 +117,45 @@ class GraphSearch(object):
 
 
 def uniformCostSearch(problem):
-    "Search the node of least total cost first. "
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    fringe = FringePriorityQueue()
+
+    closed_set = set()
+
+    node_path = []
+    fringe.push((problem.getStartState(), 0))
+
+    while True:
+        if fringe.isEmpty():
+            raise Exception("uni Failure")
+
+        node, distance = fringe.pop()
+
+        if problem.isGoalState(node):
+            node_path.append((node, 0))
+        else:
+            if node not in closed_set:
+                closed_set.add(node)
+                for successors in problem.getSuccessors(node):
+                    if successors[0] not in closed_set:
+                        new_distance = distance + successors[2]
+                        fringe.push((successors[0], new_distance))
+
+
+class FringePriorityQueue(util.PriorityQueueWithFunction):
+
+    def __init__(self):
+        util.PriorityQueueWithFunction.__init__(self, lambda x: x[1])
+        self.removed_items = set()
+
+    def pop(self):
+        item = util.PriorityQueueWithFunction.pop(self)
+        while item in self.removed_items:
+            item = util.PriorityQueueWithFunction.pop(self)
+        return item
+
+
+
 
 
 def nullHeuristic(state, problem=None):
