@@ -73,9 +73,11 @@ def tinyMazeSearch(problem):
 def depthFirstSearch(problem):
     return GraphSearch(problem, util.Stack()).search()
 
-
 def breadthFirstSearch(problem):
     return GraphSearch(problem, util.Queue()).search()
+
+def uniformCostSearch(problem):
+    return UniformedCostSearch(problem).search()
 
 
 class GraphSearch(object):
@@ -84,24 +86,24 @@ class GraphSearch(object):
         self.fringe = fringe
         self.problem = problem
         self.bfs_path = []
+        self.closed_set = set()
 
     def search(self):
-        closed_set = set()
         self.fringe.push(self.problem.getStartState())
         path = {self.problem.getStartState(): None}
 
         while True:
-            if self.fringe.isEmpty():
-                raise Exception("Graph Search Failure")
+            self.assert_fringe_empty()
+
             node = self.fringe.pop()
 
             if self.problem.isGoalState(node):
                 return self.extract_path_from_walking_history(node, path)
             else:
-                if node not in closed_set:
-                    closed_set.add(node)
+                if node not in self.closed_set:
+                    self.closed_set.add(node)
                     for successors in self.problem.getSuccessors(node):
-                        if successors[0] not in closed_set:
+                        if successors[0] not in self.closed_set:
                             self.fringe.push(successors[0])
                             path[successors[0]] = node, successors[1]
 
@@ -113,9 +115,9 @@ class GraphSearch(object):
         self.bfs_path.append(path[goal][1])
         return self.extract_path_from_walking_history(path[goal][0], path)
 
-
-def uniformCostSearch(problem):
-    return UniformedCostSearch(problem).search()
+    def assert_fringe_empty(self):
+        if self.fringe.isEmpty():
+            raise Exception("Search Failure, Fringe Empty")
 
 
 class UniformedCostSearch(GraphSearch):
@@ -127,28 +129,26 @@ class UniformedCostSearch(GraphSearch):
         super(UniformedCostSearch, self).__init__(problem, FringePriorityQueue())
 
     def search(self):
-        fringe = FringePriorityQueue()
-        closed_set = set()
-
-        fringe.push((self.problem.getStartState(), 0))
+        self.fringe.push((self.problem.getStartState(), 0))
         path = {self.problem.getStartState(): None}
 
         while True:
-            if fringe.isEmpty():
-                raise Exception("Uniform Cast Search Failure")
+            self.assert_fringe_empty()
 
-            node, distance = fringe.pop()
+            node, distance = self.fringe.pop()
 
             if self.problem.isGoalState(node):
                 return self.extract_path_from_walking_history(node, path)
             else:
-                if node not in closed_set:
-                    closed_set.add(node)
+                if node not in self.closed_set:
+                    self.closed_set.add(node)
                     for successors in self.problem.getSuccessors(node):
-                        if successors[0] not in closed_set:
+                        if successors[0] not in self.closed_set:
                             new_distance = distance + successors[2]
-                            fringe.push((successors[0], new_distance))
+                            self.fringe.push((successors[0], new_distance))
                             path[successors[0]] = node, successors[1]
+
+
 
 
 class FringePriorityQueue(util.PriorityQueueWithFunction):
