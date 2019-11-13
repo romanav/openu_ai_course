@@ -73,9 +73,11 @@ def tinyMazeSearch(problem):
 def depthFirstSearch(problem):
     return GraphSearch(problem, util.Stack()).search()
 
-
 def breadthFirstSearch(problem):
     return GraphSearch(problem, util.Queue()).search()
+
+def uniformCostSearch(problem):
+    return UniformedCostSearch(problem).search()
 
 
 class GraphSearch(object):
@@ -84,42 +86,88 @@ class GraphSearch(object):
         self.fringe = fringe
         self.problem = problem
         self.bfs_path = []
+        self.closed_set = set()
 
     def search(self):
-        closed_set = set()
-        node_path = []
         self.fringe.push(self.problem.getStartState())
         path = {self.problem.getStartState(): None}
 
         while True:
-            if self.fringe.isEmpty():
-                raise Exception("BFS Failure")
+            self.assert_fringe_empty()
+
             node = self.fringe.pop()
 
             if self.problem.isGoalState(node):
-                node_path.append((node, 0))
-                return self.get_directions_list(node, path)
+                return self.extract_path_from_walking_history(node, path)
             else:
-                if node not in closed_set:
-                    closed_set.add(node)
+                if node not in self.closed_set:
+                    self.closed_set.add(node)
                     for successors in self.problem.getSuccessors(node):
-                        if successors[0] not in closed_set:
+                        if successors[0] not in self.closed_set:
                             self.fringe.push(successors[0])
                             path[successors[0]] = node, successors[1]
 
-    def get_directions_list(self, goal, path):
+    def extract_path_from_walking_history(self, goal, path):
         if path[goal] is None:
             self.bfs_path.reverse()
             print ("Path Size: " + str(len(self.bfs_path)))
             return self.bfs_path
         self.bfs_path.append(path[goal][1])
-        return self.get_directions_list(path[goal][0], path)
+        return self.extract_path_from_walking_history(path[goal][0], path)
+
+    def assert_fringe_empty(self):
+        if self.fringe.isEmpty():
+            raise Exception("Search Failure, Fringe Empty")
 
 
-def uniformCostSearch(problem):
-    "Search the node of least total cost first. "
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+class UniformedCostSearch(GraphSearch):
+    """
+    We override graph search to utilize existing methods for UCS
+    """
+
+    def __init__(self, problem):
+        super(UniformedCostSearch, self).__init__(problem, FringePriorityQueue())
+
+    def search(self):
+        self.fringe.push((self.problem.getStartState(), 0))
+        path = {self.problem.getStartState(): None}
+
+        while True:
+            self.assert_fringe_empty()
+
+            node, distance = self.fringe.pop()
+
+            if self.problem.isGoalState(node):
+                return self.extract_path_from_walking_history(node, path)
+            else:
+                if node not in self.closed_set:
+                    self.closed_set.add(node)
+                    for successors in self.problem.getSuccessors(node):
+                        if successors[0] not in self.closed_set:
+                            new_distance = distance + successors[2]
+                            self.fringe.push((successors[0], new_distance))
+                            path[successors[0]] = node, successors[1]
+
+
+
+
+class FringePriorityQueue(util.PriorityQueueWithFunction):
+    """
+    This class override PriorityQueue class.
+    In reason it implemented as a Queue we cannot update item in it,
+    But we can check if item was already extracted and it means that it was updated with better priority
+    """
+
+    def __init__(self):
+        util.PriorityQueueWithFunction.__init__(self, lambda x: x[1])
+        self.removed_items = set()
+
+    def pop(self):
+        item = util.PriorityQueueWithFunction.pop(self)
+        while item in self.removed_items:
+            item = util.PriorityQueueWithFunction.pop(self)
+        return item
+
 
 
 def nullHeuristic(state, problem=None):
