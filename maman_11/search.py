@@ -149,8 +149,6 @@ class UniformedCostSearch(GraphSearch):
                             path[successors[0]] = node, successors[1]
 
 
-
-
 class FringePriorityQueue(util.PriorityQueueWithFunction):
     """
     This class override PriorityQueue class.
