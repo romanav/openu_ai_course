@@ -87,7 +87,6 @@ class GraphSearch(object):
 
     def search(self):
         closed_set = set()
-        node_path = []
         self.fringe.push(self.problem.getStartState())
         path = {self.problem.getStartState(): None}
 
@@ -97,8 +96,7 @@ class GraphSearch(object):
             node = self.fringe.pop()
 
             if self.problem.isGoalState(node):
-                node_path.append((node, 0))
-                return self.get_directions_list(node, path)
+                return self.extract_path_from_walking_history(node, path)
             else:
                 if node not in closed_set:
                     closed_set.add(node)
@@ -107,56 +105,58 @@ class GraphSearch(object):
                             self.fringe.push(successors[0])
                             path[successors[0]] = node, successors[1]
 
-    def get_directions_list(self, goal, path):
+    def extract_path_from_walking_history(self, goal, path):
         if path[goal] is None:
             self.bfs_path.reverse()
             print ("Path Size: " + str(len(self.bfs_path)))
             return self.bfs_path
         self.bfs_path.append(path[goal][1])
-        return self.get_directions_list(path[goal][0], path)
+        return self.extract_path_from_walking_history(path[goal][0], path)
 
 
 def uniformCostSearch(problem):
-
-    fringe = FringePriorityQueue()
-
-    closed_set = set()
-
-    node_path = []
-    fringe.push((problem.getStartState(), 0))
-    path = {problem.getStartState(): None}
-
-    while True:
-        if fringe.isEmpty():
-            raise Exception("uni Failure")
-
-        node, distance = fringe.pop()
-
-        if problem.isGoalState(node):
-            node_path.append((node, 0))
-            return get_directions_list(node, path)
-        else:
-            if node not in closed_set:
-                closed_set.add(node)
-                for successors in problem.getSuccessors(node):
-                    if successors[0] not in closed_set:
-                        new_distance = distance + successors[2]
-                        fringe.push((successors[0], new_distance))
-                        path[successors[0]] = node, successors[1]
+    return UniformedCostSearch(problem).search()
 
 
-bfs_path = []
+class UniformedCostSearch(GraphSearch):
+    """
+    We override graph search to utilize existing methods for UCS
+    """
 
-def get_directions_list(goal, path):
-    if path[goal] is None:
-        bfs_path.reverse()
-        print ("Path Size: " + str(len(bfs_path)))
-        return bfs_path
-    bfs_path.append(path[goal][1])
-    return get_directions_list(path[goal][0], path)
+    def __init__(self, problem):
+        super(UniformedCostSearch, self).__init__(problem, FringePriorityQueue())
+
+    def search(self):
+        fringe = FringePriorityQueue()
+        closed_set = set()
+
+        fringe.push((self.problem.getStartState(), 0))
+        path = {self.problem.getStartState(): None}
+
+        while True:
+            if fringe.isEmpty():
+                raise Exception("Uniform Cast Search Failure")
+
+            node, distance = fringe.pop()
+
+            if self.problem.isGoalState(node):
+                return self.extract_path_from_walking_history(node, path)
+            else:
+                if node not in closed_set:
+                    closed_set.add(node)
+                    for successors in self.problem.getSuccessors(node):
+                        if successors[0] not in closed_set:
+                            new_distance = distance + successors[2]
+                            fringe.push((successors[0], new_distance))
+                            path[successors[0]] = node, successors[1]
 
 
 class FringePriorityQueue(util.PriorityQueueWithFunction):
+    """
+    This class override PriorityQueue class.
+    In reason it implemented as a Queue we cannot update item in it,
+    But we can check if item was already extracted and it means that it was updated with better priority
+    """
 
     def __init__(self):
         util.PriorityQueueWithFunction.__init__(self, lambda x: x[1])
@@ -167,8 +167,6 @@ class FringePriorityQueue(util.PriorityQueueWithFunction):
         while item in self.removed_items:
             item = util.PriorityQueueWithFunction.pop(self)
         return item
-
-
 
 
 
