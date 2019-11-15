@@ -59,6 +59,18 @@ class SearchProblem:
         util.raiseNotDefined()
 
 
+def nullHeuristic(state, problem=None):
+    """
+  A heuristic function estimates the cost from the current state to the nearest
+  goal in the provided SearchProblem.  This heuristic is trivial.
+  """
+    return 0
+
+
+def manhattan_heuristic(state, problem=None):
+    return util.manhattanDistance(state, problem.goal)
+
+
 def tinyMazeSearch(problem):
     """
   Returns a sequence of moves that solves tinyMaze.  For any other
@@ -77,8 +89,11 @@ def breadthFirstSearch(problem):
     return GraphSearch(problem, util.Queue()).search()
 
 def uniformCostSearch(problem):
-    return UniformedCostSearch(problem).search()
+    return HeuristicGraphSearch(problem, nullHeuristic).search()
 
+def aStarSearch(problem, heuristic=nullHeuristic):
+    """Search the node that has the lowest combined cost and heuristic first."""
+    return HeuristicGraphSearch(problem, manhattan_heuristic).search()
 
 class GraphSearch(object):
 
@@ -120,13 +135,15 @@ class GraphSearch(object):
             raise Exception("Search Failure, Fringe Empty")
 
 
-class UniformedCostSearch(GraphSearch):
+class HeuristicGraphSearch(GraphSearch):
     """
     We override graph search to utilize existing methods for UCS
     """
 
-    def __init__(self, problem):
-        super(UniformedCostSearch, self).__init__(problem, FringePriorityQueue())
+    def __init__(self, problem, heuristic):
+        super(HeuristicGraphSearch, self).__init__(problem, FringePriorityQueue())
+        self.heuristic = heuristic
+
 
     def search(self):
         self.fringe.push((self.problem.getStartState(), 0))
@@ -144,7 +161,7 @@ class UniformedCostSearch(GraphSearch):
                     self.closed_set.add(node)
                     for successors in self.problem.getSuccessors(node):
                         if successors[0] not in self.closed_set:
-                            new_distance = distance + successors[2]
+                            new_distance = distance + successors[2] + self.heuristic(successors[0], self.problem)
                             self.fringe.push((successors[0], new_distance))
                             path[successors[0]] = node, successors[1]
 
@@ -168,18 +185,6 @@ class FringePriorityQueue(util.PriorityQueueWithFunction):
 
 
 
-def nullHeuristic(state, problem=None):
-    """
-  A heuristic function estimates the cost from the current state to the nearest
-  goal in the provided SearchProblem.  This heuristic is trivial.
-  """
-    return 0
-
-
-def aStarSearch(problem, heuristic=nullHeuristic):
-    "Search the node that has the lowest combined cost and heuristic first."
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
 
 # Abbreviations
