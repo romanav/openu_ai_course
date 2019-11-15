@@ -68,7 +68,7 @@ def nullHeuristic(state, problem=None):
 
 
 def manhattan_heuristic(state, problem=None):
-    return util.manhattanDistance(state, problem.goal)
+    return util.manhattanDistance(state[0], problem.goal)
 
 
 def tinyMazeSearch(problem):
@@ -146,13 +146,13 @@ class HeuristicGraphSearch(GraphSearch):
 
 
     def search(self):
-        self.fringe.push((self.problem.getStartState(), 0))
+        self.fringe.push((self.problem.getStartState(), 0, 0))
         path = {self.problem.getStartState(): None}
 
         while True:
             self.assert_fringe_empty()
 
-            node, distance = self.fringe.pop()
+            node, heuristic_distance, distance = self.fringe.pop()
 
             if self.problem.isGoalState(node):
                 return self.extract_path_from_walking_history(node, path)
@@ -161,8 +161,8 @@ class HeuristicGraphSearch(GraphSearch):
                     self.closed_set.add(node)
                     for successors in self.problem.getSuccessors(node):
                         if successors[0] not in self.closed_set:
-                            new_distance = distance + successors[2] + self.heuristic(successors[0], self.problem)
-                            self.fringe.push((successors[0], new_distance))
+                            heuristic_distance = distance + successors[2] + self.heuristic(successors[0], self.problem)
+                            self.fringe.push((successors[0],  heuristic_distance, distance + successors[2]))
                             path[successors[0]] = node, successors[1]
 
 

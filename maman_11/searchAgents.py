@@ -357,11 +357,49 @@ def cornersHeuristic(state, problem):
     it should be admissible.  (You need not worry about consistency for
     this heuristic to receive full credit.)
     """
+    # corners = problem.corners
+    # location, touchedCorners = state[0], state[1:]
+    # untouched = [v for i, v in enumerate(corners) if not touchedCorners[i]]
+    # mDists = [(c, util.manhattanDistance(c, location)) for c in untouched]
+    # if len(mDists) == 0:
+    #     return 0
+    #
+    # closestCorner, cost = max(mDists, key=lambda t: t[1])
+    #
+    # return cost
+
     corners = problem.corners  # These are the corner coordinates
     walls = problem.walls  # These are the walls of the maze, as a Grid (game.py)
 
-    "*** YOUR CODE HERE ***"
-    return 0  # Default to trivial solution
+    weights = []
+    for a in [0,1,2,3]:
+        next_arr = [0, 1, 2, 3]
+        next_arr.remove(a)
+        for b in next_arr:
+            next_arr2 = [0, 1, 2, 3]
+            next_arr2.remove(a)
+            next_arr2.remove(b)
+            for c in next_arr2:
+                next_arr3 = [0, 1, 2, 3]
+                next_arr3.remove(a)
+                next_arr3.remove(b)
+                next_arr3.remove(c)
+                for d in next_arr3:
+                    weights.append((get_weight(state[0], corners, a, b, c, d), (a,b,c,d)))
+    minimum = min(map(lambda x:x[0], weights))
+    to_return= 1 -float(1)/minimum
+    return to_return
+
+
+
+
+
+
+def get_weight(state, corners, a,b,c,d):
+    return util.manhattanDistance(state[0], corners[a]) + \
+           util.manhattanDistance(corners[a], corners[b]) + \
+           util.manhattanDistance(corners[b], corners[c]) + \
+           util.manhattanDistance(corners[c], corners[d])
 
 
 class AStarCornersAgent(SearchAgent):
