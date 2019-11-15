@@ -93,7 +93,7 @@ def uniformCostSearch(problem):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    return HeuristicGraphSearch(problem, manhattan_heuristic).search()
+    return HeuristicGraphSearch(problem, heuristic).search()
 
 class GraphSearch(object):
 
