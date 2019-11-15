@@ -160,28 +160,47 @@ class HeuristicGraphSearch(GraphSearch):
                 if node not in self.closed_set:
                     self.closed_set.add(node)
                     for successors in self.problem.getSuccessors(node):
-                        if successors[0] not in self.closed_set:
-                            heuristic_distance = distance + successors[2] + self.heuristic(successors[0], self.problem)
-                            self.fringe.push((successors[0],  heuristic_distance, distance + successors[2]))
+                        heuristic_distance = distance + successors[2] + self.heuristic(successors[0], self.problem)
+
+                        # This method should update real distance!!!! To the node in fringe
+                        # HAS problem with UCS A*, it should update sucessor
+                        # Need to do as in figure 3.14.
+                        # In case when in frontier:
+                        #   In case the item in frontier has higher cost
+                        #   Update Path and Also frontier
+                        if successors[0] not in self.closed_set: #and also not in frontier
                             path[successors[0]] = node, successors[1]
+                        #if in frontier: check real price and if it's lower: update path to node+ update frontier node : set updated real distance +
+                        # if successors[0] not in self.fringe.removed_items:
+                        self.fringe.push((successors[0], heuristic_distance, distance + successors[2]))
 
 
-class FringePriorityQueue(util.PriorityQueueWithFunction):
-    """
-    This class override PriorityQueue class.
-    In reason it implemented as a Queue we cannot update item in it,
-    But we can check if item was already extracted and it means that it was updated with better priority
-    """
+
+
+class FringePriorityQueue(object):
 
     def __init__(self):
-        util.PriorityQueueWithFunction.__init__(self, lambda x: x[1])
-        self.removed_items = set()
+        self.get_cost = lambda x: x[1]
+        self.get_name = lambda x: x[0]
+        self.get_distance = lambda x: x[2]
+        self.heap = []
+
+    def push(self, item):
+        for i in self.heap:
+            node = i[1]
+            if self.get_name(node) == self.get_name(item):
+                if self.get_distance(item) < self.get_distance(node):
+                    self.heap.remove(i)
+                    game.heapq.heapify(self.heap)
+                    break
+
+        game.heapq.heappush(self.heap, (self.get_cost(item), item))
 
     def pop(self):
-        item = util.PriorityQueueWithFunction.pop(self)
-        while item in self.removed_items:
-            item = util.PriorityQueueWithFunction.pop(self)
-        return item
+        return game.heapq.heappop(self.heap)[1]
+
+    def isEmpty(self):
+        return len(self.heap) == 0
 
 
 
