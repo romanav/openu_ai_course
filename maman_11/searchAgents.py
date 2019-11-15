@@ -287,14 +287,13 @@ class CornersProblem(search.SearchProblem):
         self._expanded = 0  # Number of search nodes expanded
 
         "*** YOUR CODE HERE ***"
-        self._not_visited_corners = list(self.corners)
+
 
     def getStartState(self):
         "Returns the start state (in your state space, not the full Pacman state space)"
         return self.startingPosition, ()
 
     def isGoalState(self, state):
-        print state
         if len(state[1]) == 4:
             return True
         return False

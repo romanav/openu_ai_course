@@ -175,8 +175,6 @@ class HeuristicGraphSearch(GraphSearch):
                         self.fringe.push((successors[0], heuristic_distance, distance + successors[2]))
 
 
-
-
 class FringePriorityQueue(object):
 
     def __init__(self):
