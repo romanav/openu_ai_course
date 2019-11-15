@@ -128,6 +128,7 @@ class UniformedCostSearch(GraphSearch):
     def __init__(self, problem):
         super(UniformedCostSearch, self).__init__(problem, FringePriorityQueue())
 
+
     def search(self):
         self.fringe.push((self.problem.getStartState(), 0))
         path = {self.problem.getStartState(): None}
@@ -181,7 +182,7 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     "Search the node that has the lowest combined cost and heuristic first."
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return AStarSearch(problem).search()
 
 
 # Abbreviations
@@ -189,3 +190,32 @@ bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
+
+
+class AStarSearch(GraphSearch):
+    """
+    We override graph search to utilize existing methods for UCS
+    """
+
+    def __init__(self, problem):
+        super(AStarSearch, self).__init__(problem, FringePriorityQueue())
+
+    def search(self):
+        self.fringe.push((self.problem.getStartState(), 0))
+        path = {self.problem.getStartState(): None}
+
+        while True:
+            self.assert_fringe_empty()
+
+            node, distance = self.fringe.pop()
+
+            if self.problem.isGoalState(node):
+                return self.extract_path_from_walking_history(node, path)
+            else:
+                if node not in self.closed_set:
+                    self.closed_set.add(node)
+                    for successors in self.problem.getSuccessors(node):
+                        if successors[0] not in self.closed_set:
+                            new_distance = distance + successors[2] + util.manhattanDistance(successors[0], self.problem.goal)
+                            self.fringe.push((successors[0], new_distance))
+                            path[successors[0]] = node, successors[1]
