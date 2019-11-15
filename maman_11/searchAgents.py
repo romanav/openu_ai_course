@@ -294,9 +294,9 @@ class CornersProblem(search.SearchProblem):
         return self.startingPosition
 
     def isGoalState(self, state):
-        if state in self._not_visited_corners:
-            self._not_visited_corners.remove(state)
-        return len(self._not_visited_corners) is 0
+
+        return False
+
 
     def getSuccessors(self, state):
         """
@@ -320,6 +320,14 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+            x, y = state
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+            if not hitsWall:
+                next_node = nextx, nexty
+                successors.append( (next_node, action, 1) )
+
 
         self._expanded += 1
         return successors
