@@ -287,14 +287,13 @@ class CornersProblem(search.SearchProblem):
         self._expanded = 0  # Number of search nodes expanded
 
         "*** YOUR CODE HERE ***"
-        self._not_visited_corners = list(self.corners)
+
 
     def getStartState(self):
         "Returns the start state (in your state space, not the full Pacman state space)"
         return self.startingPosition, ()
 
     def isGoalState(self, state):
-        print state
         if len(state[1]) == 4:
             return True
         return False
@@ -360,8 +359,34 @@ def cornersHeuristic(state, problem):
     corners = problem.corners  # These are the corner coordinates
     walls = problem.walls  # These are the walls of the maze, as a Grid (game.py)
 
-    "*** YOUR CODE HERE ***"
-    return 0  # Default to trivial solution
+    current_state, visited_corners = state
+
+    untouched = set(corners).difference(set(visited_corners))
+    if len(untouched) == 0:
+        return 0
+    return get_minimum_manhattan_distance(current_state, untouched)
+
+
+def get_minimum_manhattan_distance(start_state, to_visit_corners):
+    min_list = []
+    for i in to_visit_corners:
+        s = get_minimum(start_state, i, to_visit_corners.difference((i,)), 0)
+        min_list.append(s)
+
+    return min(min_list)
+
+
+def get_minimum(from_state, to_state, to_visit_list, passed_distance):
+    distance = util.manhattanDistance(from_state, to_state)
+    if len(to_visit_list) == 0:
+        return passed_distance + distance
+
+    min_list = []
+    for i in to_visit_list:
+        val = get_minimum(to_state, i, set(to_visit_list).difference((i,)), passed_distance + distance)
+        min_list.append(val)
+
+    return min(min_list)
 
 
 class AStarCornersAgent(SearchAgent):

@@ -68,7 +68,7 @@ def nullHeuristic(state, problem=None):
 
 
 def manhattan_heuristic(state, problem=None):
-    return util.manhattanDistance(state, problem.goal)
+    return util.manhattanDistance(state[0], problem.goal)
 
 
 def tinyMazeSearch(problem):
@@ -144,15 +144,14 @@ class HeuristicGraphSearch(GraphSearch):
         super(HeuristicGraphSearch, self).__init__(problem, FringePriorityQueue())
         self.heuristic = heuristic
 
-
     def search(self):
-        self.fringe.push((self.problem.getStartState(), 0))
+        self.fringe.push((self.problem.getStartState(), 0, 0))
         path = {self.problem.getStartState(): None}
 
         while True:
             self.assert_fringe_empty()
 
-            node, distance = self.fringe.pop()
+            node, heuristic_distance, distance = self.fringe.pop()
 
             if self.problem.isGoalState(node):
                 return self.extract_path_from_walking_history(node, path)
@@ -160,28 +159,49 @@ class HeuristicGraphSearch(GraphSearch):
                 if node not in self.closed_set:
                     self.closed_set.add(node)
                     for successors in self.problem.getSuccessors(node):
-                        if successors[0] not in self.closed_set:
-                            new_distance = distance + successors[2] + self.heuristic(successors[0], self.problem)
-                            self.fringe.push((successors[0], new_distance))
+                        heuristic_distance = distance + successors[2] + self.heuristic(successors[0], self.problem)
+                        if successors[0] not in self.closed_set and not self.fringe.isContain(successors):
+                            self.fringe.push((successors[0], heuristic_distance, distance + successors[2]))
                             path[successors[0]] = node, successors[1]
+                        elif self.fringe.isContain(successors):
+                            is_replaced = self.fringe.push((successors[0], heuristic_distance, distance + successors[2]))
+                            if is_replaced:
+                                path[successors[0]] = node, successors[1]
 
 
-class FringePriorityQueue(util.PriorityQueueWithFunction):
-    """
-    This class override PriorityQueue class.
-    In reason it implemented as a Queue we cannot update item in it,
-    But we can check if item was already extracted and it means that it was updated with better priority
-    """
+class FringePriorityQueue(object):
 
     def __init__(self):
-        util.PriorityQueueWithFunction.__init__(self, lambda x: x[1])
-        self.removed_items = set()
+        self.get_cost = lambda x: x[1]
+        self.get_name = lambda x: x[0]
+        self.get_distance = lambda x: x[2]
+        self.heap = []
+
+    def push(self, item):
+        replaced_in_heap = False
+        for i in self.heap:
+            node = i[1]
+            if self.get_name(node) == self.get_name(item):
+                if self.get_distance(item) < self.get_distance(node):
+                    self.heap.remove(i)
+                    game.heapq.heapify(self.heap)
+                    replaced_in_heap = True
+
+        game.heapq.heappush(self.heap, (self.get_cost(item), item))
+        return replaced_in_heap
+
+    def isContain(self, item):
+        for i in self.heap:
+            node = i[1]
+            if self.get_name(node) == self.get_name(item):
+                return True
+        return False
 
     def pop(self):
-        item = util.PriorityQueueWithFunction.pop(self)
-        while item in self.removed_items:
-            item = util.PriorityQueueWithFunction.pop(self)
-        return item
+        return game.heapq.heappop(self.heap)[1]
+
+    def isEmpty(self):
+        return len(self.heap) == 0
 
 
 
