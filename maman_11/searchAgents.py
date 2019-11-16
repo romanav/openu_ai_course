@@ -364,10 +364,13 @@ def cornersHeuristic(state, problem):
     untouched = set(corners).difference(set(visited_corners))
     if len(untouched) == 0:
         return 0
+    return get_minimum_manhattan_distance(current_state, untouched)
 
+
+def get_minimum_manhattan_distance(start_state, to_visit_corners):
     min_list = []
-    for i in untouched:
-        s = get_minimum(state[0], i, untouched.difference((i,)), 0 )
+    for i in to_visit_corners:
+        s = get_minimum(start_state, i, to_visit_corners.difference((i,)), 0)
         min_list.append(s)
 
     return min(min_list)
@@ -384,37 +387,6 @@ def get_minimum(from_state, to_state, to_visit_list, passed_distance):
         min_list.append(val)
 
     return min(min_list)
-
-
-
-
-
-
-    # weights = {}
-    # for a in [0,1,2,3]:
-    #     next_arr = [0, 1, 2, 3]
-    #     next_arr.remove(a)
-    #     for b in next_arr:
-    #         next_arr2 = [0, 1, 2, 3]
-    #         next_arr2.remove(a)
-    #         next_arr2.remove(b)
-    #         for c in next_arr2:
-    #             next_arr3 = [0, 1, 2, 3]
-    #             next_arr3.remove(a)
-    #             next_arr3.remove(b)
-    #             next_arr3.remove(c)
-    #             for d in next_arr3:
-    #                 weights[get_weight(state[0], corners, a, b, c, d)] = (a,b,c,d)
-    # to_return = min(weights.keys())
-    # print str(to_return)+" " + str(weights[to_return])
-    # return to_return
-
-
-def get_weight(state, corners, a,b,c,d):
-    return util.manhattanDistance(state, corners[a]) + \
-           util.manhattanDistance(corners[a], corners[b]) + \
-           util.manhattanDistance(corners[b], corners[c]) + \
-           util.manhattanDistance(corners[c], corners[d])
 
 
 class AStarCornersAgent(SearchAgent):
