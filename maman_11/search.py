@@ -89,11 +89,11 @@ def breadthFirstSearch(problem):
     return GraphSearch(problem, util.Queue()).search()
 
 def uniformCostSearch(problem):
-    return HeuristicGraphSearch(problem, nullHeuristic).search()
+    return HeuristicGraphSearch(problem, nullHeuristic).search(problem.getStartState(), problem.isGoalState)
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    return HeuristicGraphSearch(problem, heuristic).search()
+    return HeuristicGraphSearch(problem, heuristic).search(problem.getStartState(), problem.isGoalState)
 
 class GraphSearch(object):
 
@@ -144,16 +144,16 @@ class HeuristicGraphSearch(GraphSearch):
         super(HeuristicGraphSearch, self).__init__(problem, FringePriorityQueue())
         self.heuristic = heuristic
 
-    def search(self):
-        self.fringe.push((self.problem.getStartState(), 0, 0))
-        path = {self.problem.getStartState(): None}
+    def search(self, start_state, goal_state_method):
+        self.fringe.push((start_state, 0, 0))
+        path = {start_state: None}
 
         while True:
             self.assert_fringe_empty()
 
             node, heuristic_distance, distance = self.fringe.pop()
 
-            if self.problem.isGoalState(node):
+            if goal_state_method(node):
                 return self.extract_path_from_walking_history(node, path)
             else:
                 if node not in self.closed_set:

@@ -285,8 +285,8 @@ class CornersProblem(search.SearchProblem):
             if not startingGameState.hasFood(*corner):
                 print 'Warning: no food in corner ' + str(corner)
         self._expanded = 0  # Number of search nodes expanded
-
         "*** YOUR CODE HERE ***"
+        self.calculated = False
 
 
     def getStartState(self):
@@ -359,6 +359,19 @@ def cornersHeuristic(state, problem):
     corners = problem.corners  # These are the corner coordinates
     walls = problem.walls  # These are the walls of the maze, as a Grid (game.py)
 
+    if not problem.calculated:
+        problem.calculated = True
+        problem.goal = corners[1]
+        ba = ab = search.HeuristicGraphSearch(problem, manhattanHeuristic1).search((corners[0], ()), lambda x: x[0] == corners[1])
+        problem.goal = corners[2]
+        ca = ac = search.HeuristicGraphSearch(problem, search.manhattan_heuristic).search((corners[0], ()), lambda x: x[0] == corners[2])
+        problem.goal = corners[3]
+        da = ad = search.HeuristicGraphSearch(problem, search.manhattan_heuristic).search((corners[0], ()), lambda x: x[0] == corners[3])
+        db = bd = search.HeuristicGraphSearch(problem, search.manhattan_heuristic).search((corners[1], ()), lambda x: x[0] == corners[3])
+        dc = cd = search.HeuristicGraphSearch(problem, search.manhattan_heuristic).search((corners[2], ()), lambda x: x[0] == corners[3])
+
+
+
     current_state, visited_corners = state
 
     untouched = set(corners).difference(set(visited_corners))
@@ -366,6 +379,13 @@ def cornersHeuristic(state, problem):
         return 0
     return get_minimum_manhattan_distance(current_state, untouched)
 
+
+
+def manhattanHeuristic1(position, problem, info={}):
+    "The Manhattan distance heuristic for a PositionSearchProblem"
+    xy1 = position[0]
+    xy2 = problem.goal
+    return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
 
 def get_minimum_manhattan_distance(start_state, to_visit_corners):
     min_list = []
