@@ -144,7 +144,6 @@ class HeuristicGraphSearch(GraphSearch):
         super(HeuristicGraphSearch, self).__init__(problem, FringePriorityQueue())
         self.heuristic = heuristic
 
-
     def search(self):
         self.fringe.push((self.problem.getStartState(), 0, 0))
         path = {self.problem.getStartState(): None}
@@ -161,18 +160,13 @@ class HeuristicGraphSearch(GraphSearch):
                     self.closed_set.add(node)
                     for successors in self.problem.getSuccessors(node):
                         heuristic_distance = distance + successors[2] + self.heuristic(successors[0], self.problem)
-
-                        # This method should update real distance!!!! To the node in fringe
-                        # HAS problem with UCS A*, it should update sucessor
-                        # Need to do as in figure 3.14.
-                        # In case when in frontier:
-                        #   In case the item in frontier has higher cost
-                        #   Update Path and Also frontier
-                        if successors[0] not in self.closed_set: #and also not in frontier
+                        if successors[0] not in self.closed_set and not self.fringe.isContain(successors):
+                            self.fringe.push((successors[0], heuristic_distance, distance + successors[2]))
                             path[successors[0]] = node, successors[1]
-                        #if in frontier: check real price and if it's lower: update path to node+ update frontier node : set updated real distance +
-                        # if successors[0] not in self.fringe.removed_items:
-                        self.fringe.push((successors[0], heuristic_distance, distance + successors[2]))
+                        elif self.fringe.isContain(successors):
+                            is_replaced = self.fringe.push((successors[0], heuristic_distance, distance + successors[2]))
+                            if is_replaced:
+                                path[successors[0]] = node, successors[1]
 
 
 class FringePriorityQueue(object):
@@ -184,15 +178,24 @@ class FringePriorityQueue(object):
         self.heap = []
 
     def push(self, item):
+        replaced_in_heap = False
         for i in self.heap:
             node = i[1]
             if self.get_name(node) == self.get_name(item):
                 if self.get_distance(item) < self.get_distance(node):
                     self.heap.remove(i)
                     game.heapq.heapify(self.heap)
-                    break
+                    replaced_in_heap = True
 
         game.heapq.heappush(self.heap, (self.get_cost(item), item))
+        return replaced_in_heap
+
+    def isContain(self, item):
+        for i in self.heap:
+            node = i[1]
+            if self.get_name(node) == self.get_name(item):
+                return True
+        return False
 
     def pop(self):
         return game.heapq.heappop(self.heap)[1]
