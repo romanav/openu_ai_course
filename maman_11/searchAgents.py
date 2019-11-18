@@ -291,7 +291,7 @@ class CornersProblem(search.SearchProblem):
 
     def getStartState(self):
         "Returns the start state (in your state space, not the full Pacman state space)"
-        return self.startingPosition, ()
+        return self.startingPosition, frozenset()
 
     def isGoalState(self, state):
         if len(state[1]) == 4:
@@ -318,11 +318,11 @@ class CornersProblem(search.SearchProblem):
             nextx, nexty = int(x + dx), int(y + dy)
             hitsWall = self.walls[nextx][nexty]
             if not hitsWall:
-                cookies = state[1]
+                cookies = set(state[1])
                 if (nextx, nexty) in self.corners and (nextx, nexty) not in cookies:
-                    cookies = state[1] + ((nextx, nexty),)
+                    cookies.add((nextx, nexty))
 
-                next_node = ((nextx, nexty), cookies)
+                next_node = ((nextx, nexty),  frozenset(cookies))
                 successors.append((next_node, action, 1))
 
         self._expanded += 1
