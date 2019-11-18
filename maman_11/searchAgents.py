@@ -318,11 +318,12 @@ class CornersProblem(search.SearchProblem):
             nextx, nexty = int(x + dx), int(y + dy)
             hitsWall = self.walls[nextx][nexty]
             if not hitsWall:
-                cookies = set(state[1])
-                if (nextx, nexty) in self.corners and (nextx, nexty) not in cookies:
-                    cookies.add((nextx, nexty))
 
-                next_node = ((nextx, nexty),  frozenset(cookies))
+                visited_corners = set(state[1])
+                if (nextx, nexty) in self.corners and (nextx, nexty) not in visited_corners:
+                    visited_corners.add((nextx, nexty))
+
+                next_node = ((nextx, nexty),  frozenset(visited_corners))
                 successors.append((next_node, action, 1))
 
         self._expanded += 1
