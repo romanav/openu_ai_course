@@ -485,42 +485,16 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    #
-    # if state not in grade:
-    #     grade[state] = 0
-    # else:
-    #     grade[state] += 1
-    #
-    # # if position in foodGrid.asList():
-    # #     foodGrid.grade -= 10
-    # # else:
-    # #     foodGrid.grade += 1
-    #
-    # for successors in problem.getSuccessors(state):
-    #     grade[successors[0]] = grade[state] +1
-
-    # to_send = foodGrid.asList()
-    # to_send.append(position)
-    # return len(foodGrid.asList()) * manhatan_for_each_2_nodes(foodGrid.asList())
-    # get_distance(position, foodGrid.asList()[1], problem)
-    # return len(foodGrid.asList()) # number of items that we need to eat 12148
-
-    to_ret = get_max_distance(position, foodGrid.asList(), problem)
-    return to_ret
-
     "*** YOUR CODE HERE ***"
-
-
-def get_max_distance(point, to_visit_list, problem):
     distances = []
-    for i in to_visit_list:
-        distances.append(util.manhattanDistance(point, i))
+    for i in foodGrid.asList():
+        distances.append(util.manhattanDistance(position, i))
     if not distances:
         return 0
     admissibality_fix = 0
-    if point in to_visit_list:
+    if position in foodGrid.asList():
         admissibality_fix = 1
-    return len(to_visit_list) + max(distances) + admissibality_fix
+    return len(foodGrid.asList()) + max(distances) + admissibality_fix
 
 
 class ClosestDotSearchAgent(SearchAgent):
