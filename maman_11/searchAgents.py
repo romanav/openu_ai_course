@@ -288,7 +288,6 @@ class CornersProblem(search.SearchProblem):
 
         "*** YOUR CODE HERE ***"
 
-
     def getStartState(self):
         "Returns the start state (in your state space, not the full Pacman state space)"
         return self.startingPosition, frozenset()
@@ -297,7 +296,6 @@ class CornersProblem(search.SearchProblem):
         if len(state[1]) == 4:
             return True
         return False
-
 
     def getSuccessors(self, state):
         """
@@ -323,7 +321,7 @@ class CornersProblem(search.SearchProblem):
                 if (nextx, nexty) in self.corners and (nextx, nexty) not in visited_corners:
                     visited_corners.add((nextx, nexty))
 
-                next_node = ((nextx, nexty),  frozenset(visited_corners))
+                next_node = ((nextx, nexty), frozenset(visited_corners))
                 successors.append((next_node, action, 1))
 
         self._expanded += 1
@@ -458,6 +456,9 @@ class AStarFoodSearchAgent(SearchAgent):
         self.searchType = FoodSearchProblem
 
 
+grade = {}
+
+
 def foodHeuristic(state, problem):
     """
     Your heuristic for the FoodSearchProblem goes here.
@@ -484,8 +485,65 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
+    #
+    # if state not in grade:
+    #     grade[state] = 0
+    # else:
+    #     grade[state] += 1
+    #
+    # # if position in foodGrid.asList():
+    # #     foodGrid.grade -= 10
+    # # else:
+    # #     foodGrid.grade += 1
+    #
+    # for successors in problem.getSuccessors(state):
+    #     grade[successors[0]] = grade[state] +1
+
+    # to_send = foodGrid.asList()
+    # to_send.append(position)
+    # return len(foodGrid.asList()) * manhatan_for_each_2_nodes(foodGrid.asList())
+    # get_distance(position, foodGrid.asList()[1], problem)
+    # return len(foodGrid.asList()) # number of items that we need to eat 12148
+    to_ret = get_max_distance(position, foodGrid.asList(), problem)
+    return to_ret
+
     "*** YOUR CODE HERE ***"
-    return 0
+
+
+def get_max_distance(point, to_visit_list, problem):
+    distances = []
+    for i in to_visit_list:
+        distances.append(util.manhattanDistance(point, i))
+        # distances.append(get_distance(start=point, end=i, problem=problem))
+    if not distances:
+        return 0
+    return max(distances)
+
+# eee = 0
+
+# def get_distance(start, end, problem, storage={}, counter=[0]):
+#     key = (start, end)
+#     key2 = (end, start)
+#     if storage.has_key((start, end)):
+#         return storage[key]
+#     else:
+#         dist = PositionSearchProblem(start=start, goal=end, gameState=problem.startingGameState)
+#         aaa = search.aStarSearch(dist, manhattanHeuristic)
+#         counter.append(dist._expanded)
+#         print sum(counter)
+#         storage[key] = len(aaa)
+#         storage[key2] = storage[key]
+#         return storage[key]
+
+
+# def manhatan_for_each_2_nodes(nodes):
+#     to_return = []
+#     for i in nodes:
+#         for j in nodes:
+#             to_return.append(util.manhattanDistance(i, j))
+#     if to_return == []:
+#         return 0
+#     return max(to_return)
 
 
 class ClosestDotSearchAgent(SearchAgent):
