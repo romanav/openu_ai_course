@@ -504,6 +504,7 @@ def foodHeuristic(state, problem):
     # return len(foodGrid.asList()) * manhatan_for_each_2_nodes(foodGrid.asList())
     # get_distance(position, foodGrid.asList()[1], problem)
     # return len(foodGrid.asList()) # number of items that we need to eat 12148
+
     to_ret = get_max_distance(position, foodGrid.asList(), problem)
     return to_ret
 
@@ -514,36 +515,12 @@ def get_max_distance(point, to_visit_list, problem):
     distances = []
     for i in to_visit_list:
         distances.append(util.manhattanDistance(point, i))
-        # distances.append(get_distance(start=point, end=i, problem=problem))
     if not distances:
         return 0
-    return max(distances)
-
-# eee = 0
-
-# def get_distance(start, end, problem, storage={}, counter=[0]):
-#     key = (start, end)
-#     key2 = (end, start)
-#     if storage.has_key((start, end)):
-#         return storage[key]
-#     else:
-#         dist = PositionSearchProblem(start=start, goal=end, gameState=problem.startingGameState)
-#         aaa = search.aStarSearch(dist, manhattanHeuristic)
-#         counter.append(dist._expanded)
-#         print sum(counter)
-#         storage[key] = len(aaa)
-#         storage[key2] = storage[key]
-#         return storage[key]
-
-
-# def manhatan_for_each_2_nodes(nodes):
-#     to_return = []
-#     for i in nodes:
-#         for j in nodes:
-#             to_return.append(util.manhattanDistance(i, j))
-#     if to_return == []:
-#         return 0
-#     return max(to_return)
+    admissibality_fix = 0
+    if point in to_visit_list:
+        admissibality_fix = 1
+    return len(to_visit_list) + max(distances) + admissibality_fix
 
 
 class ClosestDotSearchAgent(SearchAgent):
