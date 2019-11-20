@@ -288,7 +288,6 @@ class CornersProblem(search.SearchProblem):
 
         "*** YOUR CODE HERE ***"
 
-
     def getStartState(self):
         "Returns the start state (in your state space, not the full Pacman state space)"
         return self.startingPosition, frozenset()
@@ -297,7 +296,6 @@ class CornersProblem(search.SearchProblem):
         if len(state[1]) == 4:
             return True
         return False
-
 
     def getSuccessors(self, state):
         """
@@ -323,7 +321,7 @@ class CornersProblem(search.SearchProblem):
                 if (nextx, nexty) in self.corners and (nextx, nexty) not in visited_corners:
                     visited_corners.add((nextx, nexty))
 
-                next_node = ((nextx, nexty),  frozenset(visited_corners))
+                next_node = ((nextx, nexty), frozenset(visited_corners))
                 successors.append((next_node, action, 1))
 
         self._expanded += 1
@@ -485,7 +483,15 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    distances = []
+    for i in foodGrid.asList():
+        distances.append(util.manhattanDistance(position, i))
+    if not distances:
+        return 0
+    admissibality_fix = 0
+    if position in foodGrid.asList():
+        admissibality_fix = 1
+    return len(foodGrid.asList()) + max(distances) + admissibality_fix
 
 
 class ClosestDotSearchAgent(SearchAgent):
