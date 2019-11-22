@@ -316,12 +316,11 @@ class CornersProblem(search.SearchProblem):
             nextx, nexty = int(x + dx), int(y + dy)
             hitsWall = self.walls[nextx][nexty]
             if not hitsWall:
-
                 visited_corners = set(state[1])
                 if (nextx, nexty) in self.corners and (nextx, nexty) not in visited_corners:
                     visited_corners.add((nextx, nexty))
 
-                next_node = ((nextx, nexty), frozenset(visited_corners))
+                next_node = ((nextx, nexty), frozenset(visited_corners)) # The key poit of the solution is to store corners that we visited as state
                 successors.append((next_node, action, 1))
 
         self._expanded += 1
@@ -360,13 +359,15 @@ def cornersHeuristic(state, problem):
 
     current_state, visited_corners = state
 
+    "*** YOUR CODE HERE ***"
+    """we in that method we calculate minimum distance from pacman to all corners"""
     untouched = set(corners).difference(set(visited_corners))
     if len(untouched) == 0:
         return 0
-    return get_minimum_manhattan_distance(current_state, untouched)
+    return get_minimum_manhattan_distance_to_all_corners(current_state, untouched)
 
 
-def get_minimum_manhattan_distance(start_state, to_visit_corners):
+def get_minimum_manhattan_distance_to_all_corners(start_state, to_visit_corners):
     min_list = []
     for i in to_visit_corners:
         s = get_minimum(start_state, i, to_visit_corners.difference((i,)), 0)
@@ -376,6 +377,7 @@ def get_minimum_manhattan_distance(start_state, to_visit_corners):
 
 
 def get_minimum(from_state, to_state, to_visit_list, passed_distance):
+    """Calculating minimum distance to points to visit in recursion"""
     distance = util.manhattanDistance(from_state, to_state)
     if len(to_visit_list) == 0:
         return passed_distance + distance
@@ -484,6 +486,7 @@ def foodHeuristic(state, problem):
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
     distances = {}
+
     for i in foodGrid.asList():
         distances[util.manhattanDistance(position, i)] = i
     if not distances:
