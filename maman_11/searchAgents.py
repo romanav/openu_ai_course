@@ -485,13 +485,20 @@ def foodHeuristic(state, problem):
     "*** YOUR CODE HERE ***"
     distances = []
     for i in foodGrid.asList():
-        distances.append(util.manhattanDistance(position, i))
+        distances.append((i, util.manhattanDistance(position, i)))
     if not distances:
         return 0
-    admissibality_fix = 0
-    if position in foodGrid.asList():
-        admissibality_fix = 1
-    return len(foodGrid.asList()) + max(distances) + admissibality_fix
+
+    min_tem, minimum = distances[0]
+    max_tem, maximum = distances[0]
+
+    for i in xrange(len(distances)):
+        if distances[i][1] <= minimum:
+            min_tem, minimum = distances[i]
+        if distances[i][1] >= maximum:
+            max_tem, maximum = distances[i]
+
+    return util.manhattanDistance(min_tem, max_tem) + util.manhattanDistance(position, min_tem) + max(0, len(distances) - 2)
 
 
 class ClosestDotSearchAgent(SearchAgent):
