@@ -490,16 +490,19 @@ def foodHeuristic(state, problem):
         return 0
 
     min_tem, minimum = distances[0]
-    max_tem, maximum = distances[0]
 
     for i in xrange(len(distances)):
         if distances[i][1] <= minimum:
             min_tem, minimum = distances[i]
-        if distances[i][1] >= maximum:
-            max_tem, maximum = distances[i]
 
-    return util.manhattanDistance(min_tem, max_tem) + util.manhattanDistance(position, min_tem) + max(0, len(
-        distances) - 2)
+    distances_from_first_food = []
+    for i in foodGrid.asList():
+        distances_from_first_food.append(util.manhattanDistance(min_tem, i))
+
+    max_dist=max(distances_from_first_food)
+
+    return minimum + max_dist + max(0, len(foodGrid.asList()))
+
 
 
 class ClosestDotSearchAgent(SearchAgent):
