@@ -316,12 +316,11 @@ class CornersProblem(search.SearchProblem):
             nextx, nexty = int(x + dx), int(y + dy)
             hitsWall = self.walls[nextx][nexty]
             if not hitsWall:
-
                 visited_corners = set(state[1])
                 if (nextx, nexty) in self.corners and (nextx, nexty) not in visited_corners:
                     visited_corners.add((nextx, nexty))
 
-                next_node = ((nextx, nexty), frozenset(visited_corners))
+                next_node = ((nextx, nexty), frozenset(visited_corners)) # The key poit of the solution is to store corners that we visited as state
                 successors.append((next_node, action, 1))
 
         self._expanded += 1
@@ -360,13 +359,15 @@ def cornersHeuristic(state, problem):
 
     current_state, visited_corners = state
 
+    "*** YOUR CODE HERE ***"
+    """we in that method we calculate minimum distance from pacman to all corners"""
     untouched = set(corners).difference(set(visited_corners))
     if len(untouched) == 0:
         return 0
-    return get_minimum_manhattan_distance(current_state, untouched)
+    return get_minimum_manhattan_distance_to_all_corners(current_state, untouched)
 
 
-def get_minimum_manhattan_distance(start_state, to_visit_corners):
+def get_minimum_manhattan_distance_to_all_corners(start_state, to_visit_corners):
     min_list = []
     for i in to_visit_corners:
         s = get_minimum(start_state, i, to_visit_corners.difference((i,)), 0)
@@ -376,6 +377,7 @@ def get_minimum_manhattan_distance(start_state, to_visit_corners):
 
 
 def get_minimum(from_state, to_state, to_visit_list, passed_distance):
+    """Calculating minimum distance to points to visit in recursion"""
     distance = util.manhattanDistance(from_state, to_state)
     if len(to_visit_list) == 0:
         return passed_distance + distance
@@ -483,23 +485,24 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    distances = []
+    distances = {}
+
     for i in foodGrid.asList():
-        distances.append((i, util.manhattanDistance(position, i)))
+        distances[util.manhattanDistance(position, i)] = i
     if not distances:
         return 0
 
-    min_tem, minimum = distances[0]
-    max_tem, maximum = distances[0]
+    distance_to_close_food = min(distances.keys())
+    close_food_coordinates = distances[distance_to_close_food]
 
-    for i in xrange(len(distances)):
-        if distances[i][1] <= minimum:
-            min_tem, minimum = distances[i]
-        if distances[i][1] >= maximum:
-            max_tem, maximum = distances[i]
+    distances_from_first_food = []
+    for i in foodGrid.asList():
+        distances_from_first_food.append(util.manhattanDistance(close_food_coordinates, i))
 
-    return util.manhattanDistance(min_tem, max_tem) + util.manhattanDistance(position, min_tem) + max(0, len(
-        distances) - 2)
+    max_dist_from_close_to_far_food=max(distances_from_first_food)
+
+    return distance_to_close_food + max_dist_from_close_to_far_food + max(0, len(foodGrid.asList()))
+
 
 
 class ClosestDotSearchAgent(SearchAgent):

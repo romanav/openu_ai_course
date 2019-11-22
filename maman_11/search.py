@@ -68,6 +68,7 @@ def nullHeuristic(state, problem=None):
 
 
 def manhattan_heuristic(state, problem=None):
+    """Method to save some writings here, from state to the goal of prblem"""
     return util.manhattanDistance(state[0], problem.goal)
 
 
@@ -85,23 +86,27 @@ def tinyMazeSearch(problem):
 def depthFirstSearch(problem):
     return GraphSearch(problem, util.Stack()).search()
 
+
 def breadthFirstSearch(problem):
     return GraphSearch(problem, util.Queue()).search()
 
+
 def uniformCostSearch(problem):
     return HeuristicGraphSearch(problem, nullHeuristic).search()
+
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     return HeuristicGraphSearch(problem, heuristic).search()
 
+
 class GraphSearch(object):
 
-    def __init__(self,  problem, fringe):
-        self.fringe = fringe
+    def __init__(self, problem, fringe):
+        self.fringe = fringe  # frontier data structure
         self.problem = problem
-        self.bfs_path = []
-        self.closed_set = set()
+        self.bfs_path = []  # We save path from start to goal here
+        self.closed_set = set()  # Store visited nodes
 
     def search(self):
         self.fringe.push(self.problem.getStartState())
@@ -120,9 +125,15 @@ class GraphSearch(object):
                     for successors in self.problem.getSuccessors(node):
                         if successors[0] not in self.closed_set:
                             self.fringe.push(successors[0])
-                            path[successors[0]] = node, successors[1]
+                            path[successors[0]] = node, successors[1]  # store path
 
     def extract_path_from_walking_history(self, goal, path):
+        """
+        WE extracting path from visited node in format of directions
+        :param goal:  - our gaol state
+        :param path:  - visited node set
+        :return:
+        """
         if path[goal] is None:
             self.bfs_path.reverse()
             print ("Path Size: " + str(len(self.bfs_path)))
@@ -138,6 +149,7 @@ class GraphSearch(object):
 class HeuristicGraphSearch(GraphSearch):
     """
     We override graph search to utilize existing methods for UCS
+    WE just want to not duplicate the code
     """
 
     def __init__(self, problem, heuristic):
@@ -163,13 +175,17 @@ class HeuristicGraphSearch(GraphSearch):
                         if successors[0] not in self.closed_set and not self.fringe.isContain(successors):
                             self.fringe.push((successors[0], heuristic_distance, distance + successors[2]))
                             path[successors[0]] = node, successors[1]
-                        elif self.fringe.isContain(successors):
-                            is_replaced = self.fringe.push((successors[0], heuristic_distance, distance + successors[2]))
-                            if is_replaced:
+                        elif self.fringe.isContain(successors): # update node with better heuristics values if needed
+                            is_replaced = self.fringe.push(
+                                (successors[0], heuristic_distance, distance + successors[2]))
+                            if is_replaced: # handle path changes when frontier updated
                                 path[successors[0]] = node, successors[1]
 
 
 class FringePriorityQueue(object):
+    """
+    This is implementation of priority data set for the A* and UniformCost search algorithms
+    """
 
     def __init__(self):
         self.get_cost = lambda x: x[1]
@@ -179,7 +195,7 @@ class FringePriorityQueue(object):
 
     def push(self, item):
         replaced_in_heap = False
-        for i in self.heap:
+        for i in self.heap:  # update heuristics value if new is smaller
             node = i[1]
             if self.get_name(node) == self.get_name(item):
                 if self.get_distance(item) < self.get_distance(node):
@@ -202,9 +218,6 @@ class FringePriorityQueue(object):
 
     def isEmpty(self):
         return len(self.heap) == 0
-
-
-
 
 
 # Abbreviations
