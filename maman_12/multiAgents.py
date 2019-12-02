@@ -71,12 +71,19 @@ class ReflexAgent(Agent):
 
     "*** YOUR CODE HERE ***"
     if action == 'Stop':
-      return -1
-    food = search.breadthFirstSearch(AnyFoodSearchProblem(currentGameState))
-    ghost = search.breadthFirstSearch(AnyGhostSearchProblem(successorGameState))
-    if len(ghost) > 2:
-      return -len(food)
-    return -len(food) - 5
+      return -100
+
+    if not len(successorGameState.getFood().asList()):
+      return 100
+    food = search.breadthFirstSearch(AnyFoodSearchProblem(successorGameState))
+
+    if not [i for i in newScaredTimes if i!=0]:
+      ghost = search.breadthFirstSearch(AnyGhostSearchProblem(successorGameState))
+      if len(ghost) <= 1:
+        return -100
+    if len(currentGameState.getFood().asList()) > len(successorGameState.getFood().asList()):
+      return 0
+    return -len(food)
     # return successorGameState.getScore()
 
 class AnyGhostSearchProblem(PositionSearchProblem):
