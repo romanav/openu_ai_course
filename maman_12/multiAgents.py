@@ -5,7 +5,8 @@
 # purposes. The Pacman AI projects were developed at UC Berkeley, primarily by
 # John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
-
+import search
+from searchAgents import AnyFoodSearchProblem, PositionSearchProblem
 from util import manhattanDistance
 from game import Directions
 import random, util
@@ -43,6 +44,7 @@ class ReflexAgent(Agent):
 
     "Add more of your code here if you want to"
 
+
     return legalMoves[chosenIndex]
 
   def evaluationFunction(self, currentGameState, action):
@@ -68,7 +70,51 @@ class ReflexAgent(Agent):
     newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
     "*** YOUR CODE HERE ***"
-    return successorGameState.getScore()
+    if action == 'Stop':
+      return -1
+    food = search.breadthFirstSearch(AnyFoodSearchProblem(currentGameState))
+    ghost = search.breadthFirstSearch(AnyGhostSearchProblem(successorGameState))
+    if len(ghost) > 2:
+      return -len(food)
+    return -len(food) - 5
+    # return successorGameState.getScore()
+
+class AnyGhostSearchProblem(PositionSearchProblem):
+    """
+      A search problem for finding a path to any food.
+
+      This search problem is just like the PositionSearchProblem, but
+      has a different goal test, which you need to fill in below.  The
+      state space and successor function do not need to be changed.
+
+      The class definition above, AnyFoodSearchProblem(PositionSearchProblem),
+      inherits the methods of the PositionSearchProblem.
+
+      You can use this search problem to help you fill in
+      the findPathToClosestDot method.
+    """
+
+    def __init__(self, gameState):
+      "Stores information from the gameState.  You don't need to change this."
+      # Store the food for later reference
+      self.food = [i.getPosition() for i in gameState.getGhostStates()]
+
+      # Store info for the PositionSearchProblem (no need to change this)
+      self.walls = gameState.getWalls()
+      self.startState = gameState.getPacmanPosition()
+      self.costFn = lambda x: 1
+      self._visited, self._visitedlist, self._expanded = {}, [], 0
+
+    def isGoalState(self, state):
+      """
+      The state is Pacman's position. Fill this in with a goal test
+      that will complete the problem definition.
+      """
+      x, y = state
+
+      if state in self.food:
+        return True
+      return False
 
 def scoreEvaluationFunction(currentGameState):
   """
