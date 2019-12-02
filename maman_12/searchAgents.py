@@ -551,7 +551,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
       the findPathToClosestDot method.
     """
 
-    def __init__(self, gameState):
+    def     __init__(self, gameState):
         "Stores information from the gameState.  You don't need to change this."
         # Store the food for later reference
         self.food = gameState.getFood()
