@@ -166,7 +166,53 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns the total number of agents in the game
     """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        search = MiniMaxSearch(self.depth)
+        return search.decision(gameState)
+
+
+class MiniMaxSearch(object):
+
+    def __init__(self, depth):
+        self._max_depth = depth
+
+    def decision(self, game_state):
+        current_depth = 0
+        legal_moves = game_state.getLegalActions()
+        to_return = []
+        for move in legal_moves:
+            to_return.append(self._min_value(game_state.generatePacmanSuccessor(move), current_depth))
+
+        max_val = max(to_return, key=lambda x: x[1])[1]
+        return random.choice([i[0] for i in to_return if i[1] == max_val])
+
+    def _max_value(self, game_state, current_depth):
+        current_depth += 1
+        if self._is_terminal_state(game_state, current_depth):
+            return game_state.getScore()
+
+        return max(self._iterate_over_min(current_depth, game_state), key=lambda x: x[1])
+
+    def _min_value(self, game_state, current_depth):
+        current_depth += 1
+        if self._is_terminal_state(game_state, current_depth):
+            return game_state.getScore()
+
+        return min(self._iterate_over_max(current_depth, game_state), key=lambda x: x[1])
+
+    def _iterate_over_max(self, current_depth, game_state):
+        legal_moves = game_state.getLegalActions()
+        for i in legal_moves:
+            yield i, self._max_value(game_state.generatePacmanSuccessor(i), current_depth)
+
+    def _iterate_over_min(self, current_depth, game_state):
+        legal_moves = game_state.getLegalActions()
+        for i in legal_moves:
+            yield i, self._min_value(game_state.generatePacmanSuccessor(i), current_depth)
+
+    def _is_terminal_state(self, game_state, current_depth):
+        if current_depth == self._max_depth:
+            return True
+        return game_state.isLose() or game_state.isWin()
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
