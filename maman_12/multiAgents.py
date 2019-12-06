@@ -181,7 +181,8 @@ class MiniMaxSearch(object):
         legal_moves = game_state.getLegalActions()
         to_return = []
         for move in legal_moves:
-            to_return.append((move, self._min_value(game_state.generatePacmanSuccessor(move), current_depth, 1)))
+            if move != 'Stop':
+                to_return.append((move, self._min_value(game_state.generatePacmanSuccessor(move), current_depth, 1)))
 
         max_val = max(to_return, key=lambda x: x[1])[1]
         return random.choice([i[0] for i in to_return if i[1] == max_val])
@@ -194,9 +195,9 @@ class MiniMaxSearch(object):
 
         min_values = []
         for move in game_state.getLegalActions(0):
-            min_values.append(self._min_value(game_state.generatePacmanSuccessor(move), current_depth, 1))
+            if move != 'Stop':
+                min_values.append(self._min_value(game_state.generatePacmanSuccessor(move), current_depth, 1))
         return max(min_values)
-
 
     def _min_value(self, game_state, current_depth, agent_id):
         current_depth += 1
@@ -206,10 +207,12 @@ class MiniMaxSearch(object):
         max_values = []
         if not self._is_ghost_id_exist(game_state, agent_id+1):
             for move in game_state.getLegalActions(agent_id):
-                max_values.append(self._max_value(game_state.generateSuccessor(agent_id, move), current_depth))
+                if move != 'Stop':
+                    max_values.append(self._max_value(game_state.generateSuccessor(agent_id, move), current_depth))
         else:
             for move in game_state.getLegalActions(agent_id):
-                max_values.append(self._min_value(game_state.generateSuccessor(agent_id, move), current_depth, agent_id+1))
+                if move != 'Stop':
+                    max_values.append(self._min_value(game_state.generateSuccessor(agent_id, move), current_depth, agent_id+1))
 
         return min(max_values)
 
