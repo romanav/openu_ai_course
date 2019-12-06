@@ -191,9 +191,10 @@ class MiniMaxSearch(object):
         if self._is_terminal_state(game_state, current_depth):
             return game_state.getScore()
 
-        return max(
-            [self._min_value(game_state.generatePacmanSuccessor(move), current_depth) for move in game_state.getLegalActions(0)]
-        )
+        min_values =[]
+        for move in game_state.getLegalActions(0):
+            min_values.append(self._min_value(game_state.generatePacmanSuccessor(move), current_depth))
+        return max(min_values)
 
     def _min_value(self, game_state, current_depth):
         current_depth += 1
