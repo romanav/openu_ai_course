@@ -175,12 +175,13 @@ class MiniMaxSearch(object):
     def __init__(self, depth):
         self._max_depth = depth
 
+
     def decision(self, game_state):
         current_depth = 0
         legal_moves = game_state.getLegalActions()
         to_return = []
         for move in legal_moves:
-            to_return.append((move, self._min_value(game_state.generatePacmanSuccessor(move), current_depth)))
+            to_return.append((move, self._min_value(game_state.generatePacmanSuccessor(move), current_depth, 1)))
 
         max_val = max(to_return, key=lambda x: x[1])[1]
         return random.choice([i[0] for i in to_return if i[1] == max_val])
@@ -191,21 +192,30 @@ class MiniMaxSearch(object):
         if self._is_terminal_state(game_state, current_depth):
             return game_state.getScore()
 
-        min_values =[]
+        min_values = []
         for move in game_state.getLegalActions(0):
-            min_values.append(self._min_value(game_state.generatePacmanSuccessor(move), current_depth))
+            min_values.append(self._min_value(game_state.generatePacmanSuccessor(move), current_depth, 1))
         return max(min_values)
 
-    def _min_value(self, game_state, current_depth):
+
+    def _min_value(self, game_state, current_depth, agent_id):
         current_depth += 1
         if self._is_terminal_state(game_state, current_depth):
             return game_state.getScore()
 
         max_values = []
-        for move in game_state.getLegalActions(1):
-            max_values.append(self._max_value(game_state.generateSuccessor(1, move), current_depth))
+        if not self._is_ghost_id_exist(game_state, agent_id+1):
+            for move in game_state.getLegalActions(agent_id):
+                max_values.append(self._max_value(game_state.generateSuccessor(agent_id, move), current_depth))
+        else:
+            for move in game_state.getLegalActions(agent_id):
+                max_values.append(self._min_value(game_state.generateSuccessor(agent_id, move), current_depth, agent_id+1))
 
         return min(max_values)
+
+    def _is_ghost_id_exist(self, game_state, agent_id):
+        ghost_count = game_state.getNumAgents()
+        return agent_id != 0 and agent_id < ghost_count
 
     def _is_terminal_state(self, game_state, current_depth):
         if current_depth == self._max_depth:
