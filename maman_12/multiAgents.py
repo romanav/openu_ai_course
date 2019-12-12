@@ -173,24 +173,29 @@ class MinimaxAgent(MultiAgentSearchAgent):
 class MiniMaxSearch(object):
 
     def __init__(self, depth):
-        # print "depth: " + str(depth)
         self._max_depth = depth
 
     def decision(self, game_state):
-        current_depth = 0
         return self._max_value(game_state, 0, True)[1]
 
     def _max_value(self, game_state, current_depth, return_move=False):
         values = []
         if self._is_max_terminal_state(game_state, current_depth):
-            return game_state.getScore()
-
-        for move in game_state.getLegalActions(0):
-            if move != 'Stop':
-                min_value = self._min_value(game_state.generatePacmanSuccessor(move), current_depth+1, 1)
+            for move in game_state.getLegalActions(0):
+                score = game_state.generatePacmanSuccessor(move).getScore()
                 if return_move:
-                    min_value = min_value, move
-                values.append(min_value)
+                    score = score, move
+                values.append(score)
+            if not values:
+                return game_state.getScore()
+
+        else:
+            for move in game_state.getLegalActions(0):
+                if move != 'Stop':
+                    min_value = self._min_value(game_state.generatePacmanSuccessor(move), current_depth+1, 1)
+                    if return_move:
+                        min_value = min_value, move
+                    values.append(min_value)
 
         if return_move:
             return max(values, key=lambda x: x[0])
@@ -200,17 +205,23 @@ class MiniMaxSearch(object):
     def _min_value(self, game_state, current_depth, agent_id):
         values = []
         if self.is_min_terminal_state(game_state, current_depth, agent_id):
+            # for move in game_state.getLegalActions(game_state):
+            #     score = game_state.generatePacmanSuccessor(move).getScore()
+            #     values.append(score)
+            # if not values:
             return game_state.getScore()
-
-        if self._is_this_final_ghosts_to_check(game_state, agent_id):
-            for move in game_state.getLegalActions(agent_id):
-                max_value = self._max_value(game_state.generateSuccessor(agent_id, move), current_depth+1)
-                values.append(max_value)
+            # return min(values)
 
         else:
-            for move in game_state.getLegalActions(agent_id):
-                min_value = self._min_value(game_state.generateSuccessor(agent_id, move), current_depth, agent_id+1)
-                values.append(min_value)
+            if self._is_this_final_ghosts_to_check(game_state, agent_id):
+                for move in game_state.getLegalActions(agent_id):
+                    max_value = self._max_value(game_state.generateSuccessor(agent_id, move), current_depth+1)
+                    values.append(max_value)
+
+            else:
+                for move in game_state.getLegalActions(agent_id):
+                    min_value = self._min_value(game_state.generateSuccessor(agent_id, move), current_depth, agent_id+1)
+                    values.append(min_value)
 
         return min(values)
 
