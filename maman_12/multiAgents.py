@@ -205,12 +205,7 @@ class MiniMaxSearch(object):
     def _min_value(self, game_state, current_depth, agent_id):
         values = []
         if self.is_min_terminal_state(game_state, current_depth, agent_id):
-            # for move in game_state.getLegalActions(game_state):
-            #     score = game_state.generatePacmanSuccessor(move).getScore()
-            #     values.append(score)
-            # if not values:
             return game_state.getScore()
-            # return min(values)
 
         else:
             if self._is_this_final_ghosts_to_check(game_state, agent_id):
