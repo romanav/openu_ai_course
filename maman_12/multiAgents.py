@@ -5,6 +5,8 @@
 # purposes. The Pacman AI projects were developed at UC Berkeley, primarily by
 # John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
+
+
 import search
 from searchAgents import AnyFoodSearchProblem, PositionSearchProblem
 from util import manhattanDistance
@@ -192,7 +194,7 @@ class MiniMaxSearch(object):
         else:
             for move in game_state.getLegalActions(0):
                 if move != 'Stop':
-                    min_value = self._min_value(game_state.generatePacmanSuccessor(move), current_depth+1, 1)
+                    min_value = self._min_value(game_state.generatePacmanSuccessor(move), current_depth + 1, 1)
                     if return_move:
                         min_value = min_value, move
                     values.append(min_value)
@@ -210,27 +212,28 @@ class MiniMaxSearch(object):
         else:
             if self._is_this_final_ghosts_to_check(game_state, agent_id):
                 for move in game_state.getLegalActions(agent_id):
-                    max_value = self._max_value(game_state.generateSuccessor(agent_id, move), current_depth+1)
+                    max_value = self._max_value(game_state.generateSuccessor(agent_id, move), current_depth + 1)
                     values.append(max_value)
 
             else:
                 for move in game_state.getLegalActions(agent_id):
-                    min_value = self._min_value(game_state.generateSuccessor(agent_id, move), current_depth, agent_id+1)
+                    min_value = self._min_value(game_state.generateSuccessor(agent_id, move), current_depth,
+                                                agent_id + 1)
                     values.append(min_value)
 
         return min(values)
 
     def _is_this_final_ghosts_to_check(self, game_state, agent_id):
-        return not self._is_ghost_id_exist(game_state, agent_id+1)
+        return not self._is_ghost_id_exist(game_state, agent_id + 1)
 
     def _is_ghost_id_exist(self, game_state, agent_id):
         ghost_count = game_state.getNumAgents()
         return agent_id != 0 and agent_id < ghost_count
 
     def is_min_terminal_state(self, game_state, current_depth, agent_id):
-        if game_state.isLose()or game_state.isWin():
+        if game_state.isLose() or game_state.isWin():
             return True
-        if current_depth == self._max_depth and not self._is_ghost_id_exist(game_state, agent_id+1):
+        if current_depth == self._max_depth and not self._is_ghost_id_exist(game_state, agent_id + 1):
             return True
         return False
 
@@ -245,12 +248,41 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     Your minimax agent with alpha-beta pruning (question 3)
   """
 
-    def getAction(self, gameState):
-        """
-      Returns the minimax action using self.depth and self.evaluationFunction
-    """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+    def getAction(self, game_state):
+        return self._max_value(game_state, 0, (-float("inf"), float("inf")), True)[1]
+
+    def _max_value(self, game_state, current_depth, alpha_beta, return_move=False):
+        if self._is_max_terminal_state(game_state, current_depth):
+            return game_state.getScore()
+
+        alpha, beta = alpha_beta
+        v = -float("inf")
+
+        for move in game_state.getLegalActions(0):
+            v = max(v, self._min_value(game_state.generateSuccessor(0, move), current_depth + 1, (alpha, beta)))
+            if v >= beta:
+                return v
+            alpha = max(alpha, v)
+        return v
+
+    def _min_value(self, game_state, current_depth, alpha_beta):
+        if self._is_max_terminal_state(game_state, current_depth):
+            return game_state.getScore()
+
+        alpha, beta = alpha_beta
+        v = float("inf")
+
+        for move in game_state.getLegalActions(1):
+            v = min(v, self._max_value(game_state.generateSuccessor(1, move), current_depth + 1, (alpha, beta)))
+            if v <= alpha:
+                return v
+            beta = max(beta, v)
+        return v
+
+    def _is_max_terminal_state(self, game_state, current_depth):
+        if current_depth == self.depth:
+            return True
+        return game_state.isLose() or game_state.isWin()
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
