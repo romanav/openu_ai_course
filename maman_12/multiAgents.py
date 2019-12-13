@@ -174,13 +174,20 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
 class MiniMaxSearch(object):
 
+
     def __init__(self, depth):
+        self._nodes_open = 0
         self._max_depth = depth
 
     def decision(self, game_state):
-        return self._max_value(game_state, 0, True)[1]
+        self._nodes_open = 0
+        try:
+            return self._max_value(game_state, 0, True)[1]
+        finally:
+            print "nodes open: " + str(self._nodes_open)
 
     def _max_value(self, game_state, current_depth, return_move=False):
+        self._nodes_open += 1
         values = []
         if self._is_max_terminal_state(game_state, current_depth):
             for move in game_state.getLegalActions(0):
@@ -205,6 +212,7 @@ class MiniMaxSearch(object):
         return max(values)
 
     def _min_value(self, game_state, current_depth, agent_id):
+        self._nodes_open += 1
         values = []
         if self.is_min_terminal_state(game_state, current_depth, agent_id):
             return game_state.getScore()
@@ -244,14 +252,20 @@ class MiniMaxSearch(object):
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
+    _nodes_open = 0
     """
     Your minimax agent with alpha-beta pruning (question 3)
-  """
+    """
 
     def getAction(self, game_state):
-        return self._max_value(game_state, 0, (-float("inf"), float("inf")), True)[1]
+        self._nodes_open = 0
+        try:
+            return self._max_value(game_state, 0, (-float("inf"), float("inf")), True)[1]
+        finally:
+            print "node open: " + str(self._nodes_open)
 
     def _max_value(self, game_state, current_depth, alpha_beta, return_move=False):
+        self._nodes_open += 1
         if self._is_max_terminal_state(game_state, current_depth):
             return game_state.getScore()
 
@@ -261,30 +275,41 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
         for move in game_state.getLegalActions(0):
             if move != 'Stop':
-                v = max(v, self._min_value(game_state.generateSuccessor(0, move), current_depth + 1, (alpha, beta)))
+                v = max(v, self._min_value(game_state.generateSuccessor(0, move), current_depth + 1, (alpha, beta), 1))
                 to_return.append((v, move))
                 if v >= beta:
                     if return_move:
-                        return [(val,mov) for val, mov in to_return if val == v][0]
+                        return [(val, mov) for val, mov in to_return if val == v][0]
                     return v
                 alpha = max(alpha, v)
         if return_move:
             return [(val, mov) for val, mov in to_return if val == v][0]
         return v
 
-    def _min_value(self, game_state, current_depth, alpha_beta):
+    def _min_value(self, game_state, current_depth, alpha_beta, agent_id):
+        self._nodes_open += 1
         if self._is_max_terminal_state(game_state, current_depth):
             return game_state.getScore()
 
         alpha, beta = alpha_beta
         v = float("inf")
 
-        for move in game_state.getLegalActions(1):
-            v = min(v, self._max_value(game_state.generateSuccessor(1, move), current_depth + 1, (alpha, beta)))
+        for move in game_state.getLegalActions(agent_id):
+            if not self._is_this_final_ghosts_to_check(game_state, agent_id):
+                v = min(v, self._min_value(game_state.generateSuccessor(agent_id, move), current_depth, (alpha, beta), agent_id+1))
+            else:
+                v = min(v, self._max_value(game_state.generateSuccessor(agent_id, move), current_depth + 1, (alpha, beta)))
             if v <= alpha:
                 return v
-            beta = max(beta, v)
+            beta = min(beta, v)
         return v
+
+    def _is_this_final_ghosts_to_check(self, game_state, agent_id):
+        return not self._is_ghost_id_exist(game_state, agent_id + 1)
+
+    def _is_ghost_id_exist(self, game_state, agent_id):
+        ghost_count = game_state.getNumAgents()
+        return agent_id != 0 and agent_id < ghost_count
 
     def _is_max_terminal_state(self, game_state, current_depth):
         if current_depth == self.depth:
