@@ -257,12 +257,19 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
         alpha, beta = alpha_beta
         v = -float("inf")
+        to_return = []
 
         for move in game_state.getLegalActions(0):
-            v = max(v, self._min_value(game_state.generateSuccessor(0, move), current_depth + 1, (alpha, beta)))
-            if v >= beta:
-                return v
-            alpha = max(alpha, v)
+            if move != 'Stop':
+                v = max(v, self._min_value(game_state.generateSuccessor(0, move), current_depth + 1, (alpha, beta)))
+                to_return.append((v, move))
+                if v >= beta:
+                    if return_move:
+                        return [(val,mov) for val, mov in to_return if val == v][0]
+                    return v
+                alpha = max(alpha, v)
+        if return_move:
+            return [(val, mov) for val, mov in to_return if val == v][0]
         return v
 
     def _min_value(self, game_state, current_depth, alpha_beta):
