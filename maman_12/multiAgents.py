@@ -288,7 +288,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
     def _min_value(self, game_state, current_depth, alpha_beta, agent_id):
         self._nodes_open += 1
-        if self._is_max_terminal_state(game_state, current_depth):
+        if self._is_min_terminal_state(game_state, current_depth, agent_id):
             return game_state.getScore()
 
         alpha, beta = alpha_beta
@@ -315,6 +315,13 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         if current_depth == self.depth:
             return True
         return game_state.isLose() or game_state.isWin()
+
+    def _is_min_terminal_state(self, game_state, current_depth, agent_id):
+        if game_state.isLose() or game_state.isWin():
+            return True
+        if current_depth == self.depth and not self._is_ghost_id_exist(game_state, agent_id + 1):
+            return True
+        return False
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
