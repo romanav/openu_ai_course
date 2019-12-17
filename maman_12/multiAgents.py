@@ -258,16 +258,28 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     """
 
     def getAction(self, game_state):
-        self._nodes_open = 0
-        try:
+        # self._nodes_open = 0
+        # try:
             return self._max_value(game_state, 0, (-float("inf"), float("inf")), True)[1]
-        finally:
-            print "node open: " + str(self._nodes_open)
+        # finally:
+        #     print "node open: " + str(self._nodes_open)
 
     def _max_value(self, game_state, current_depth, alpha_beta, return_move=False):
         self._nodes_open += 1
         if self._is_max_terminal_state(game_state, current_depth):
-            return game_state.getScore()
+            values = []
+            for move in game_state.getLegalActions(0):
+                score = game_state.generatePacmanSuccessor(move).getScore()
+                if return_move:
+                    score = score, move
+                values.append(score)
+            if not values:
+                return game_state.getScore()
+            else:
+                if return_move:
+                    return max(values, key= lambda x: x[0])
+                else:
+                    return max(values)
 
         alpha, beta = alpha_beta
         v = -float("inf")
