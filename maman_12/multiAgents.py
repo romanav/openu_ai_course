@@ -72,21 +72,35 @@ class ReflexAgent(Agent):
 
         "*** YOUR CODE HERE ***"
         if action == 'Stop':
-            return -100
+            return -float("inf")
+        ghost_dist = 0
+        for ghostState in newGhostStates:
+            position = ghostState.getPosition()
+            ghost_dist += manhattanDistance(successorGameState.getPacmanPosition(), position)
 
-        if not len(successorGameState.getFood().asList()):
-            return 0  # if we ate all  food we need to return something to make run finish
+        food_dist = []
+        for food_pos in oldFood.asList():
+            food_dist.append(manhattanDistance(successorGameState.getPacmanPosition(), food_pos))
 
-        food = search.breadthFirstSearch(AnyFoodSearchProblem(successorGameState))  # find closest food path
+        return ghost_dist*1.0/(min(food_dist)+1)
 
-        if not [i for i in newScaredTimes if i != 0]:  # if we have any ghost that not scared get
-            ghost = search.breadthFirstSearch(AnyGhostSearchProblem(successorGameState))  # find closest ghost path
-            if len(ghost) <= 1:  # if we too close to ghost => don't go there
-                return -999999
-        if len(currentGameState.getFood().asList()) > len(
-                successorGameState.getFood().asList()):  # in case we are on food cell
-            return 0
-        return -len(food)  # return distance to food with minus sings, close food get higher score
+
+        # if action == 'Stop':
+        #     return -100
+        #
+        # if not len(successorGameState.getFood().asList()):
+        #     return 0  # if we ate all  food we need to return something to make run finish
+        #
+        # food = search.breadthFirstSearch(AnyFoodSearchProblem(successorGameState))  # find closest food path
+        #
+        # if not [i for i in newScaredTimes if i != 0]:  # if we have any ghost that not scared get
+        #     ghost = search.breadthFirstSearch(AnyGhostSearchProblem(successorGameState))  # find closest ghost path
+        #     if len(ghost) <= 1:  # if we too close to ghost => don't go there
+        #         return -999999
+        # if len(currentGameState.getFood().asList()) > len(
+        #         successorGameState.getFood().asList()):  # in case we are on food cell
+        #     return 0
+        # return -len(food)  # return distance to food with minus sings, close food get higher score
 
 
 class AnyGhostSearchProblem(PositionSearchProblem):
