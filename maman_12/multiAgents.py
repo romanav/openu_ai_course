@@ -72,18 +72,18 @@ class ReflexAgent(Agent):
         if action == 'Stop':
             return -float("inf")
 
-        ghost_dist = 0
+        ghost_dist = []
         for ghostState in newGhostStates:
             position = ghostState.getPosition()
             if manhattanDistance(newPos, position) <= 1:  # to close to ghost, run!!!
                 return -float("inf")
-            ghost_dist += manhattanDistance(successorGameState.getPacmanPosition(), position)
+            ghost_dist.append(manhattanDistance(successorGameState.getPacmanPosition(), position))
 
         food_dist = []
         for food_pos in oldFood.asList():
             food_dist.append(manhattanDistance(successorGameState.getPacmanPosition(), food_pos))
 
-        return ghost_dist * 1.0 / (min(food_dist) + 0.1)
+        return min(ghost_dist) * 1.0 / (min(food_dist) + 0.1)
 
 
 def scoreEvaluationFunction(currentGameState):
