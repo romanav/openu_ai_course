@@ -7,8 +7,6 @@
 # For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
 
 
-import search
-from searchAgents import AnyFoodSearchProblem, PositionSearchProblem
 from util import manhattanDistance
 from game import Directions
 import random, util
@@ -73,11 +71,11 @@ class ReflexAgent(Agent):
         "*** YOUR CODE HERE ***"
         if action == 'Stop':
             return -float("inf")
+
         ghost_dist = 0
         for ghostState in newGhostStates:
-
             position = ghostState.getPosition()
-            if manhattanDistance(newPos, position) <= 1:
+            if manhattanDistance(newPos, position) <= 1:  # to close to ghost, run!!!
                 return -float("inf")
             ghost_dist += manhattanDistance(successorGameState.getPacmanPosition(), position)
 
@@ -86,27 +84,6 @@ class ReflexAgent(Agent):
             food_dist.append(manhattanDistance(successorGameState.getPacmanPosition(), food_pos))
 
         return ghost_dist * 1.0 / (min(food_dist) + 0.1)
-
-
-class AnyGhostSearchProblem(PositionSearchProblem):
-    """
-    Same as any food, but find any ghost
-    """
-
-    def __init__(self, gameState):
-        # Store the food for later reference
-        self.food = [i.getPosition() for i in gameState.getGhostStates()]
-
-        # Store info for the PositionSearchProblem (no need to change this)
-        self.walls = gameState.getWalls()
-        self.startState = gameState.getPacmanPosition()
-        self.costFn = lambda x: 1
-        self._visited, self._visitedlist, self._expanded = {}, [], 0
-
-    def isGoalState(self, state):
-        if state in self.food:
-            return True
-        return False
 
 
 def scoreEvaluationFunction(currentGameState):
