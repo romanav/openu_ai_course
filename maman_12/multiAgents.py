@@ -7,8 +7,6 @@
 # For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
 
 
-import search
-from searchAgents import AnyFoodSearchProblem, PositionSearchProblem
 from util import manhattanDistance
 from game import Directions
 import random, util
@@ -72,42 +70,24 @@ class ReflexAgent(Agent):
 
         "*** YOUR CODE HERE ***"
         if action == 'Stop':
-            return -100
+            return -float("inf")
 
-        if not len(successorGameState.getFood().asList()):
-            return 0  # if we ate all  food we need to return something to make run finish
+        ghost_dist = []
 
-        food = search.breadthFirstSearch(AnyFoodSearchProblem(successorGameState))  # find closest food path
+        # get all manhattan distances to ghosts
+        for ghostState in newGhostStates:
+            position = ghostState.getPosition()
+            if manhattanDistance(newPos, position) <= 1:  # to close to ghost, run!!!
+                return -float("inf")
+            ghost_dist.append(manhattanDistance(successorGameState.getPacmanPosition(), position))
 
-        if not [i for i in newScaredTimes if i != 0]:  # if we have any ghost that not scared get
-            ghost = search.breadthFirstSearch(AnyGhostSearchProblem(successorGameState))  # find closest ghost path
-            if len(ghost) <= 1:  # if we too close to ghost => don't go there
-                return -999999
-        if len(currentGameState.getFood().asList()) > len(
-                successorGameState.getFood().asList()):  # in case we are on food cell
-            return 0
-        return -len(food)  # return distance to food with minus sings, close food get higher score
+        # get all distances to food
+        food_dist = []
+        for food_pos in oldFood.asList():
+            food_dist.append(manhattanDistance(successorGameState.getPacmanPosition(), food_pos))
 
-
-class AnyGhostSearchProblem(PositionSearchProblem):
-    """
-    Same as any food, but find any ghost
-    """
-
-    def __init__(self, gameState):
-        # Store the food for later reference
-        self.food = [i.getPosition() for i in gameState.getGhostStates()]
-
-        # Store info for the PositionSearchProblem (no need to change this)
-        self.walls = gameState.getWalls()
-        self.startState = gameState.getPacmanPosition()
-        self.costFn = lambda x: 1
-        self._visited, self._visitedlist, self._expanded = {}, [], 0
-
-    def isGoalState(self, state):
-        if state in self.food:
-            return True
-        return False
+        # closest ghost / closest food - we want to be far from ghost and close to food
+        return min(ghost_dist) * 1.0 / (min(food_dist) + 0.1)
 
 
 def scoreEvaluationFunction(currentGameState):
@@ -378,7 +358,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
     def _ghost_average(self, game_state, depth):
         values = self._get_scores(game_state, depth, 1)
-        avg = sum(values)*1.0/len(values)
+        avg = sum(values) * 1.0 / len(values)
         return avg
 
     def _get_scores(self, game_state, depth, agent):
@@ -393,7 +373,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 val = self._max_value(game_state.generateSuccessor(agent, move), depth + 1)
                 values.append(val)
             else:
-                values += self._get_scores(game_state.generateSuccessor(agent, move),depth, agent+1)
+                values += self._get_scores(game_state.generateSuccessor(agent, move), depth, agent + 1)
 
         return values
 
