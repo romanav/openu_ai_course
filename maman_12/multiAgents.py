@@ -148,12 +148,15 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns the total number of agents in the game
     """
         "*** YOUR CODE HERE ***"
+        print "======depth = {0} ========".format(self.depth)
         score = self._max_value(gameState, 0)
         return None
 
     def _max_value(self, game_state, depth):
         if self._is_terminal_state(game_state, depth):
-            return self.evaluationFunction(game_state)
+            score = self.evaluationFunction(game_state)
+            print "MAX LEAf: {0}".format(score)
+            return score
 
         v = -float("inf")
 
@@ -162,16 +165,20 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         return v
 
-    def _min_value(self, game_state, depth):
-        agent_id = 1
+    def _min_value(self, game_state, depth, agent_id=1):
 
         if self._is_terminal_state(game_state, depth):
-            return self.evaluationFunction(game_state)
+            score = self.evaluationFunction(game_state)
+            print "MIN LEAf: {0}".format(score)
+            return score
 
         v = float("inf")
 
         for action in game_state.getLegalActions(agent_id):
-            v = min(v, self._max_value(game_state.generateSuccessor(agent_id, action), depth+1))
+            if agent_id == self._get_ghosts_count(game_state):
+                v = min(v, self._max_value(game_state.generateSuccessor(agent_id, action), depth+1))
+            else:
+                v = min(v, self._min_value(game_state.generateSuccessor(agent_id, action), depth, agent_id+1))
 
         return v
 
@@ -182,6 +189,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
             return True
         return False
 
+    def _get_ghosts_count(self, game_state):
+        return game_state.getNumAgents() - 1
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     _nodes_open = 0
