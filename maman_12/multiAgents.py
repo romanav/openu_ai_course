@@ -148,19 +148,22 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns the total number of agents in the game
     """
         "*** YOUR CODE HERE ***"
-        print "======depth = {0} ========".format(self.depth)
-        score = self._max_value(gameState, 1)
-        return None
+        score, action = self._max_value(gameState, 1, True)
+        return action
 
-    def _max_value(self, game_state, depth):
+    def _max_value(self, game_state, depth, return_action=False):
         if self._is_game_finished(game_state):
             return self.evaluationFunction(game_state)
 
-        v = -float("inf")
+        v = -float("inf"), None
+
         for action in game_state.getLegalActions(0):
             if action != 'Stop':
-                v = max(v, self._min_value(game_state.generateSuccessor(0, action), depth))
-        return v
+                v = max(v, (self._min_value(game_state.generateSuccessor(0, action), depth), action), key=lambda x: x[0])
+
+        if return_action:
+            return v
+        return v[0]
 
     def _min_value(self, game_state, depth, agent_id=1):
 
@@ -170,18 +173,15 @@ class MinimaxAgent(MultiAgentSearchAgent):
         if agent_id == self._get_ghosts_count(game_state) and depth == self.depth:
             v = float("inf")
             for action in game_state.getLegalActions(agent_id):
-                print self.evaluationFunction(game_state.generateSuccessor(agent_id, action))
                 v = min(v, self.evaluationFunction(game_state.generateSuccessor(agent_id, action)))
             return v
 
         v = float("inf")
-
         for action in game_state.getLegalActions(agent_id):
             if agent_id == self._get_ghosts_count(game_state):
                 v = min(v, self._max_value(game_state.generateSuccessor(agent_id, action), depth+1))
             else:
                 v = min(v, self._min_value(game_state.generateSuccessor(agent_id, action), depth, agent_id+1))
-
         return v
 
     def _is_game_finished(self, game_state):
