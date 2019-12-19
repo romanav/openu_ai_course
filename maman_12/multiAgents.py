@@ -75,32 +75,17 @@ class ReflexAgent(Agent):
             return -float("inf")
         ghost_dist = 0
         for ghostState in newGhostStates:
+
             position = ghostState.getPosition()
+            if manhattanDistance(newPos, position) <= 1:
+                return -float("inf")
             ghost_dist += manhattanDistance(successorGameState.getPacmanPosition(), position)
 
         food_dist = []
         for food_pos in oldFood.asList():
             food_dist.append(manhattanDistance(successorGameState.getPacmanPosition(), food_pos))
 
-        return ghost_dist*1.0/(min(food_dist)+1)
-
-
-        # if action == 'Stop':
-        #     return -100
-        #
-        # if not len(successorGameState.getFood().asList()):
-        #     return 0  # if we ate all  food we need to return something to make run finish
-        #
-        # food = search.breadthFirstSearch(AnyFoodSearchProblem(successorGameState))  # find closest food path
-        #
-        # if not [i for i in newScaredTimes if i != 0]:  # if we have any ghost that not scared get
-        #     ghost = search.breadthFirstSearch(AnyGhostSearchProblem(successorGameState))  # find closest ghost path
-        #     if len(ghost) <= 1:  # if we too close to ghost => don't go there
-        #         return -999999
-        # if len(currentGameState.getFood().asList()) > len(
-        #         successorGameState.getFood().asList()):  # in case we are on food cell
-        #     return 0
-        # return -len(food)  # return distance to food with minus sings, close food get higher score
+        return ghost_dist * 1.0 / (min(food_dist) + 0.1)
 
 
 class AnyGhostSearchProblem(PositionSearchProblem):
@@ -392,7 +377,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
     def _ghost_average(self, game_state, depth):
         values = self._get_scores(game_state, depth, 1)
-        avg = sum(values)*1.0/len(values)
+        avg = sum(values) * 1.0 / len(values)
         return avg
 
     def _get_scores(self, game_state, depth, agent):
@@ -407,7 +392,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 val = self._max_value(game_state.generateSuccessor(agent, move), depth + 1)
                 values.append(val)
             else:
-                values += self._get_scores(game_state.generateSuccessor(agent, move),depth, agent+1)
+                values += self._get_scores(game_state.generateSuccessor(agent, move), depth, agent + 1)
 
         return values
 
