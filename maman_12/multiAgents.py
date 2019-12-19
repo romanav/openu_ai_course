@@ -73,16 +73,20 @@ class ReflexAgent(Agent):
             return -float("inf")
 
         ghost_dist = []
+
+        # get all manhattan distances to ghosts
         for ghostState in newGhostStates:
             position = ghostState.getPosition()
             if manhattanDistance(newPos, position) <= 1:  # to close to ghost, run!!!
                 return -float("inf")
             ghost_dist.append(manhattanDistance(successorGameState.getPacmanPosition(), position))
 
+        # get all distances to food
         food_dist = []
         for food_pos in oldFood.asList():
             food_dist.append(manhattanDistance(successorGameState.getPacmanPosition(), food_pos))
 
+        # closest ghost / closest food - we want to be far from ghost and close to food
         return min(ghost_dist) * 1.0 / (min(food_dist) + 0.1)
 
 
