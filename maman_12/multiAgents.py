@@ -149,27 +149,30 @@ class MinimaxAgent(MultiAgentSearchAgent):
     """
         "*** YOUR CODE HERE ***"
         print "======depth = {0} ========".format(self.depth)
-        score = self._max_value(gameState, 0)
+        score = self._max_value(gameState, 1)
         return None
 
     def _max_value(self, game_state, depth):
-        if self._is_terminal_state(game_state, depth):
-            v = -float("inf")
-            for action in game_state.getLegalActions(0):
-                v = max(v, self.evaluationFunction(game_state.generateSuccessor(0, action)))
-            return v
+        if self._is_game_finished(game_state):
+            return self.evaluationFunction(game_state)
 
         v = -float("inf")
         for action in game_state.getLegalActions(0):
-            v = max(v, self._min_value(game_state.generateSuccessor(0, action), depth+1))
+            if action != 'Stop':
+                v = max(v, self._min_value(game_state.generateSuccessor(0, action), depth))
         return v
 
     def _min_value(self, game_state, depth, agent_id=1):
 
-        if self._is_terminal_state(game_state, depth):
-            score = self.evaluationFunction(game_state)
-            print "MIN LEAf: {0}".format(score)
-            return score
+        if self._is_game_finished(game_state):
+            return self.evaluationFunction(game_state)
+
+        if agent_id == self._get_ghosts_count(game_state) and depth == self.depth:
+            v = float("inf")
+            for action in game_state.getLegalActions(agent_id):
+                print self.evaluationFunction(game_state.generateSuccessor(agent_id, action))
+                v = min(v, self.evaluationFunction(game_state.generateSuccessor(agent_id, action)))
+            return v
 
         v = float("inf")
 
@@ -181,10 +184,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         return v
 
-    def _is_terminal_state(self, game_state, depth):
+    def _is_game_finished(self, game_state):
         if game_state.isLose() or game_state.isWin():
-            return True
-        if depth == self.depth:
             return True
         return False
 
