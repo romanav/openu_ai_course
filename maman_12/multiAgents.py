@@ -148,87 +148,49 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns the total number of agents in the game
     """
         "*** YOUR CODE HERE ***"
-        search = MiniMaxSearch(self.depth)
-        return search.decision(gameState)
+        score, action = self._max_value(gameState, 1, True)
+        return action
 
+    def _max_value(self, game_state, depth, return_action=False):
+        if self._is_game_finished(game_state):
+            return self.evaluationFunction(game_state)
 
-class MiniMaxSearch(object):
+        v = -float("inf"), None
 
-    def __init__(self, depth):
-        self._nodes_open = 0
-        self._max_depth = depth
+        for action in game_state.getLegalActions(0):
+            if action != 'Stop':
+                v = max(v, (self._min_value(game_state.generateSuccessor(0, action), depth), action), key=lambda x: x[0])
 
-    def decision(self, game_state):
-        self._nodes_open = 0
-        try:
-            return self._max_value(game_state, 0, True)[1]
-        finally:
-            print "nodes open: " + str(self._nodes_open)
+        if return_action:
+            return v
+        return v[0]
 
-    def _max_value(self, game_state, current_depth, return_move=False):
-        self._nodes_open += 1
-        values = []
-        if self._is_max_terminal_state(game_state, current_depth):
-            for move in game_state.getLegalActions(0):
-                score = game_state.generatePacmanSuccessor(move).getScore()
-                if return_move:
-                    score = score, move
-                values.append(score)
-            if not values:
-                return game_state.getScore()
+    def _min_value(self, game_state, depth, agent_id=1):
 
-        else:
-            for move in game_state.getLegalActions(0):
-                if move != 'Stop':
-                    min_value = self._min_value(game_state.generatePacmanSuccessor(move), current_depth + 1, 1)
-                    if return_move:
-                        min_value = min_value, move
-                    values.append(min_value)
+        if self._is_game_finished(game_state):
+            return self.evaluationFunction(game_state)
 
-        if return_move:
-            return max(values, key=lambda x: x[0])
+        if agent_id == self._get_ghosts_count(game_state) and depth == self.depth:
+            v = float("inf")
+            for action in game_state.getLegalActions(agent_id):
+                v = min(v, self.evaluationFunction(game_state.generateSuccessor(agent_id, action)))
+            return v
 
-        return max(values)
-
-    def _min_value(self, game_state, current_depth, agent_id):
-        self._nodes_open += 1
-        values = []
-        if self.is_min_terminal_state(game_state, current_depth, agent_id):
-            return game_state.getScore()
-
-        else:
-            if self._is_this_final_ghosts_to_check(game_state, agent_id):
-                for move in game_state.getLegalActions(agent_id):
-                    max_value = self._max_value(game_state.generateSuccessor(agent_id, move), current_depth + 1)
-                    values.append(max_value)
-
+        v = float("inf")
+        for action in game_state.getLegalActions(agent_id):
+            if agent_id == self._get_ghosts_count(game_state):
+                v = min(v, self._max_value(game_state.generateSuccessor(agent_id, action), depth+1))
             else:
-                for move in game_state.getLegalActions(agent_id):
-                    min_value = self._min_value(game_state.generateSuccessor(agent_id, move), current_depth,
-                                                agent_id + 1)
-                    values.append(min_value)
+                v = min(v, self._min_value(game_state.generateSuccessor(agent_id, action), depth, agent_id+1))
+        return v
 
-        return min(values)
-
-    def _is_this_final_ghosts_to_check(self, game_state, agent_id):
-        return not self._is_ghost_id_exist(game_state, agent_id + 1)
-
-    def _is_ghost_id_exist(self, game_state, agent_id):
-        ghost_count = game_state.getNumAgents()
-        return agent_id != 0 and agent_id < ghost_count
-
-    def is_min_terminal_state(self, game_state, current_depth, agent_id):
+    def _is_game_finished(self, game_state):
         if game_state.isLose() or game_state.isWin():
-            return True
-        if current_depth == self._max_depth and not self._is_ghost_id_exist(game_state, agent_id + 1):
             return True
         return False
 
-    def _is_max_terminal_state(self, game_state, current_depth):
-        if current_depth == self._max_depth:
-            return True
-        return game_state.isLose() or game_state.isWin()
-
+    def _get_ghosts_count(self, game_state):
+        return game_state.getNumAgents() - 1
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     _nodes_open = 0
