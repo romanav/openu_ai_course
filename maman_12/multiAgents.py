@@ -148,34 +148,21 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns the total number of agents in the game
     """
         "*** YOUR CODE HERE ***"
-        search = MiniMaxSearch(self.depth)
-        return search.decision(gameState)
+        score, move = self._max_value(gameState, 0, True)
+        return move
 
-
-class MiniMaxSearch(object):
-
-    def __init__(self, depth):
-        self._nodes_open = 0
-        self._max_depth = depth
-
-    def decision(self, game_state):
-        self._nodes_open = 0
-        try:
-            return self._max_value(game_state, 0, True)[1]
-        finally:
-            print "nodes open: " + str(self._nodes_open)
 
     def _max_value(self, game_state, current_depth, return_move=False):
-        self._nodes_open += 1
         values = []
         if self._is_max_terminal_state(game_state, current_depth):
+
             for move in game_state.getLegalActions(0):
                 score = game_state.generatePacmanSuccessor(move).getScore()
                 if return_move:
                     score = score, move
                 values.append(score)
             if not values:
-                return game_state.getScore()
+                return self.evaluationFunction(game_state)
 
         else:
             for move in game_state.getLegalActions(0):
@@ -191,7 +178,6 @@ class MiniMaxSearch(object):
         return max(values)
 
     def _min_value(self, game_state, current_depth, agent_id):
-        self._nodes_open += 1
         values = []
         if self.is_min_terminal_state(game_state, current_depth, agent_id):
             return game_state.getScore()
@@ -220,12 +206,12 @@ class MiniMaxSearch(object):
     def is_min_terminal_state(self, game_state, current_depth, agent_id):
         if game_state.isLose() or game_state.isWin():
             return True
-        if current_depth == self._max_depth and not self._is_ghost_id_exist(game_state, agent_id + 1):
+        if current_depth == self.depth and not self._is_ghost_id_exist(game_state, agent_id + 1):
             return True
         return False
 
     def _is_max_terminal_state(self, game_state, current_depth):
-        if current_depth == self._max_depth:
+        if current_depth == self.depth:
             return True
         return game_state.isLose() or game_state.isWin()
 
