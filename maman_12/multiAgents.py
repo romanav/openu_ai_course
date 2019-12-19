@@ -154,15 +154,14 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     def _max_value(self, game_state, depth):
         if self._is_terminal_state(game_state, depth):
-            score = self.evaluationFunction(game_state)
-            print "MAX LEAf: {0}".format(score)
-            return score
+            v = -float("inf")
+            for action in game_state.getLegalActions(0):
+                v = max(v, self.evaluationFunction(game_state.generateSuccessor(0, action)))
+            return v
 
         v = -float("inf")
-
         for action in game_state.getLegalActions(0):
             v = max(v, self._min_value(game_state.generateSuccessor(0, action), depth+1))
-
         return v
 
     def _min_value(self, game_state, depth, agent_id=1):
