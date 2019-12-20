@@ -33,6 +33,8 @@ code to run a game.  This file is divided into three sections:
 To play your first game, type 'python pacman.py' from the command line.
 The keys are 'a', 's', 'd', and 'w' to move (or arrow keys).  Have fun!
 """
+import datetime
+
 from game import GameStateData
 from game import Game
 from game import Directions
@@ -264,6 +266,7 @@ class ClassicGameRules:
     self.quiet = quiet
     return game
 
+  game_num = 1
   def process(self, state, game):
     """
     Checks to see whether it is time to end the game.
@@ -272,11 +275,13 @@ class ClassicGameRules:
     if state.isLose(): self.lose(state, game)
 
   def win( self, state, game ):
-    if not self.quiet: print "Pacman emerges victorious! Score: %d" % state.data.score
+    if not self.quiet: print "%d Pacman emerges victorious! Score: %d" % (self.game_num, state.data.score)
+    self.game_num += 1
     game.gameOver = True
 
   def lose( self, state, game ):
-    if not self.quiet: print "Pacman died! Score: %d" % state.data.score
+    if not self.quiet: print "%d Pacman died! Score: %d" % (self.game_num, state.data.score)
+    self.game_num += 1
     game.gameOver = True
 
   def getProgress(self, game):
@@ -615,6 +620,7 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
   rules = ClassicGameRules(timeout)
   games = []
 
+  start_t = datetime.datetime.now()
   for i in range( numGames ):
     beQuiet = i < numTraining
     if beQuiet:
@@ -636,6 +642,10 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
       components = {'layout': layout, 'actions': game.moveHistory}
       cPickle.dump(components, f)
       f.close()
+
+  end_t = datetime.datetime.now()
+  print "Execution Time: " + str(end_t - start_t)
+
 
   if numGames > 1:
     scores = [game.state.getScore() for game in games]
