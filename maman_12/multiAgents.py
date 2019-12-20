@@ -235,7 +235,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             return v
 
         for action in game_state.getLegalActions(agent_id):
-            v = min(v, self._max_value(game_state.generateSuccessor(agent_id, action), depth+1, (alpha, beta)))
+            next_state = game_state.generateSuccessor(agent_id, action)
+            if agent_id == self._get_ghosts_count(game_state):
+                v = min(v, self._max_value(next_state, depth+1, (alpha, beta)))
+            else:
+                v = min(v, self._min_value(next_state, depth,(alpha,beta), agent_id+1))
             if v <= alpha:
                 return v
             beta = min(beta, v)
