@@ -1,13 +1,14 @@
 MINIMAX:
 
 Execution Time: 0:02:22.229982
-Average Score: 193.15
-Win Rate:      654/1000 (0.66)
+Win Rate:      662/1000 (0.66)
 
 ALPHA BETTA:
 
 Execution Time: 0:00:40.198964
-Average Score: 163.884
 Win Rate:      651/1000 (0.65)
 
+ExpectimaxAgent:
 
+Execution Time: 0:02:14.187951
+Win Rate:      812/1000 (0.81)
