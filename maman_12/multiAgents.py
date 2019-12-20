@@ -215,9 +215,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             if action != 'Stop':
                 next_state = game_state.generateSuccessor(0, action)
                 v = max(v, (self._min_value(next_state, depth, (alpha, beta)), action), key=lambda x: x[0])
-                if v >= beta:
+                if v[0] >= beta:
                     return v if return_move else v[0]
-                alpha = max(alpha, v)
+                alpha = max(alpha, v[0])
         return v if return_move else v[0]
 
     def _min_value(self, game_state, depth, alpha_beta, agent_id=1):
