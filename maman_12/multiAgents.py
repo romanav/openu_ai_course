@@ -199,8 +199,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     """
 
     def getAction(self, game_state):
-        score = self._max_value(game_state, 1, (-float("inf"), float("inf")), True)
-        return None
+        score, move = self._max_value(game_state, 1, (-float("inf"), float("inf")), True)
+        return move
 
     def _max_value(self, game_state, depth, alpha_beta, return_move=False):
 
@@ -209,15 +209,16 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
         alpha, beta = alpha_beta
 
-        v = -float("inf")
+        v = -float("inf"), None
 
         for action in game_state.getLegalActions(0):
             if action != 'Stop':
-                v = max(v, self._min_value(game_state.generateSuccessor(0, action), depth, (alpha, beta)))
+                next_state = game_state.generateSuccessor(0, action)
+                v = max(v, (self._min_value(next_state, depth, (alpha, beta)), action), key=lambda x: x[0])
                 if v >= beta:
-                    return v
+                    return v if return_move else v[0]
                 alpha = max(alpha, v)
-        return v
+        return v if return_move else v[0]
 
     def _min_value(self, game_state, depth, alpha_beta, agent_id=1):
         if self._is_game_finished(game_state):
@@ -239,7 +240,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             if agent_id == self._get_ghosts_count(game_state):
                 v = min(v, self._max_value(next_state, depth+1, (alpha, beta)))
             else:
-                v = min(v, self._min_value(next_state, depth,(alpha,beta), agent_id+1))
+                v = min(v, self._min_value(next_state, depth, (alpha, beta), agent_id+1))
             if v <= alpha:
                 return v
             beta = min(beta, v)
