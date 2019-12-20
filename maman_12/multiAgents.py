@@ -199,9 +199,10 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     """
 
     def getAction(self, game_state):
-        score, move = self._max_value(game_state, 0, (-float("inf"), float("inf")), True)
+        score = self._max_value(game_state, 1, (-float("inf"), float("inf")), True)
+        return None
 
-    def _max_value(self, game_state, current_depth, alpha_beta, return_move=False):
+    def _max_value(self, game_state, depth, alpha_beta, return_move=False):
 
         if self._is_game_finished(game_state):
             return self.evaluationFunction(game_state)
@@ -212,22 +213,29 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
         for action in game_state.getLegalActions(0):
             if action != 'Stop':
-                v = max(v, self._min_value(game_state.generateSuccessor(0, action), current_depth, (alpha, beta)))
+                v = max(v, self._min_value(game_state.generateSuccessor(0, action), depth, (alpha, beta)))
                 if v >= beta:
                     return v
                 alpha = max(alpha, v)
         return v
 
-    def _min_value(self, game_state, current_depth, alpha_beta):
+    def _min_value(self, game_state, depth, alpha_beta, agent_id=1):
         if self._is_game_finished(game_state):
             return self.evaluationFunction(game_state)
 
         alpha, beta = alpha_beta
-
         v = float("inf")
 
-        for action in game_state.getLegalActions(0):
-            v = min(v, self._max_value(game_state.generateSuccessor(1, action), current_depth, (alpha, beta)))
+        if agent_id == self._get_ghosts_count(game_state) and depth == self.depth:
+            for action in game_state.getLegalActions(agent_id):
+                v = min(v, self.evaluationFunction(game_state.generateSuccessor(agent_id, action)))
+                if v <= alpha:
+                    return v
+                beta = min(beta, v)
+            return v
+
+        for action in game_state.getLegalActions(agent_id):
+            v = min(v, self._max_value(game_state.generateSuccessor(agent_id, action), depth+1, (alpha, beta)))
             if v <= alpha:
                 return v
             beta = min(beta, v)
